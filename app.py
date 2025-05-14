@@ -13,9 +13,8 @@ ASSISTANT_ID = os.getenv("ASSISTANT_ID")
 app = Flask(__name__)
 
 # ✅ GPT 응답 저장 함수
-def save_response_log(utterance, answer):
+def save_response_log(utterance, answer, elapsed):
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    elapsed = round(time.time() - start_time, 2)
     with open("responses.txt", "w", encoding="utf-8") as f:
         f.write(f"[시간] {now}\n[질문] {utterance}\n[답변] {answer}\n[응답 시간] {elapsed}초\n")
 
@@ -23,8 +22,15 @@ def save_response_log(utterance, answer):
 def load_latest_response():
     try:
         with open("responses.txt", "r", encoding="utf-8") as f:
-            lines = f.read()
-            return lines or "🤖 후비 답변: 아직 생성된 응답이 없습니다."
+            lines = f.readlines()
+            question = ""
+            answer = ""
+            for line in lines:
+                if line.startswith("[질문]"):
+                    question = line.replace("[질문]", "질문:").strip()
+                elif line.startswith("[답변]"):
+                    answer = line.replace("[답변]", "🤖 후비 답변:").strip()
+            return f"{question}\n{answer}"
     except FileNotFoundError:
         return "🤖 후비 답변: 아직 응답 기록이 없습니다."
 
@@ -73,7 +79,6 @@ def webhook():
 # ✅ GPT 생성 비동기 함수
 def run_gpt_thread(utterance):
     try:
-        global start_time
         start_time = time.time()
 
         thread = openai.beta.threads.create()
@@ -99,10 +104,11 @@ def run_gpt_thread(utterance):
         messages = openai.beta.threads.messages.list(thread_id=thread_id)
         answer = messages.data[0].content[0].text.value
 
-        save_response_log(utterance, answer)
+        elapsed = round(time.time() - start_time, 2)
+        save_response_log(utterance, answer, elapsed)
 
     except Exception as e:
-        save_response_log(utterance, f"[GPT 오류] {str(e)}")
+        save_response_log(utterance, f"[GPT 오류] {str(e)}", 0)
 
 # ✅ 웹 페이지로 결과 보여주는 라우트
 @app.route("/response")
