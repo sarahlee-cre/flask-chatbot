@@ -1,6 +1,7 @@
 import os
 import threading
 import openai
+import time
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
 
@@ -16,6 +17,8 @@ def home():
 
 def run_gpt_thread(utterance):
     try:
+        start_time = time.time()  # ⏱️ 시작 시각
+
         thread = openai.beta.threads.create()
         thread_id = thread.id
 
@@ -30,14 +33,24 @@ def run_gpt_thread(utterance):
             assistant_id=ASSISTANT_ID
         )
 
-        # 최대 5초 대기
         for _ in range(5):
             run_status = openai.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
             if run_status.status == "completed":
                 break
+            time.sleep(1)
+
+        messages = openai.beta.threads.messages.list(thread_id=thread_id)
+        answer = messages.data[0].content[0].text.value
+
+        end_time = time.time()  # ⏱️ 종료 시각
+        elapsed = round(end_time - start_time, 2)  # 소수점 2자리
+
+        with open("gpt_response.txt", "w", encoding="utf-8") as f:
+            f.write(f"[입력]\n{utterance}\n\n[응답]\n{answer}\n\n[소요 시간] {elapsed}초")
 
     except Exception as e:
-        print(f"[GPT 처리 오류] {e}")
+        with open("gpt_response.txt", "w", encoding="utf-8") as f:
+            f.write(f"[GPT 오류] {str(e)}")
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
@@ -45,10 +58,8 @@ def webhook():
         user_input = request.get_json()
         utterance = user_input['userRequest']['utterance']
 
-        # GPT 처리는 비동기적으로 실행
         threading.Thread(target=run_gpt_thread, args=(utterance,)).start()
 
-        # 우선 응답
         return jsonify({
             "version": "2.0",
             "template": {
