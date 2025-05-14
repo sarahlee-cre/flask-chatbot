@@ -1,16 +1,32 @@
 import os
-import json
+import threading
+import openai
 import time
 from flask import Flask, request, jsonify, render_template_string
-import openai
 from dotenv import load_dotenv
+from datetime import datetime
 
 load_dotenv()
-
 openai.api_key = os.getenv("OPENAI_API_KEY")
 ASSISTANT_ID = os.getenv("ASSISTANT_ID")
 
 app = Flask(__name__)
+
+# ✅ GPT 응답 저장 함수
+def save_response_log(utterance, answer):
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    elapsed = round(time.time() - start_time, 2)
+    with open("responses.txt", "w", encoding="utf-8") as f:
+        f.write(f"[시간] {now}\n[질문] {utterance}\n[답변] {answer}\n[응답 시간] {elapsed}초\n")
+
+# ✅ 최근 GPT 응답 불러오기 함수
+def load_latest_response():
+    try:
+        with open("responses.txt", "r", encoding="utf-8") as f:
+            lines = f.read()
+            return lines or "🤖 후비 답변: 아직 생성된 응답이 없습니다."
+    except FileNotFoundError:
+        return "🤖 후비 답변: 아직 응답 기록이 없습니다."
 
 @app.route("/")
 def home():
@@ -20,56 +36,29 @@ def home():
 def webhook():
     try:
         user_input = request.get_json()
-        utterance = user_input['userRequest']['utterance']
+        utterance = user_input['userRequest']['utterance'].strip().lower()
 
-        # ✅ 1차 응답 (즉시)
-        response = {
+        if utterance == "go":
+            latest_response = load_latest_response()
+            return jsonify({
+                "version": "2.0",
+                "template": {
+                    "outputs": [
+                        {"simpleText": {"text": latest_response}}
+                    ]
+                }
+            })
+
+        threading.Thread(target=run_gpt_thread, args=(utterance,)).start()
+
+        return jsonify({
             "version": "2.0",
             "template": {
                 "outputs": [
                     {"simpleText": {"text": "🤖 GPT 응답을 생성 중이에요. 잠시만 기다려주세요!"}}
                 ]
             }
-        }
-
-        # ✅ GPT 비동기 실행을 위한 사전 작업
-        thread = openai.beta.threads.create()
-        thread_id = thread.id
-        openai.beta.threads.messages.create(
-            thread_id=thread_id,
-            role="user",
-            content=utterance
-        )
-
-        start_time = time.time()
-        run = openai.beta.threads.runs.create(
-            thread_id=thread_id,
-            assistant_id=ASSISTANT_ID
-        )
-
-        for _ in range(10):
-            run_status = openai.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
-            if run_status.status == "completed":
-                break
-            time.sleep(1)
-        else:
-            answer = "⚠️ GPT 응답 시간이 초과되었습니다."
-            elapsed = "-"
-
-        # ✅ GPT 응답 추출
-        messages = openai.beta.threads.messages.list(thread_id=thread_id)
-        answer = messages.data[0].content[0].text.value
-        elapsed = f"{round(time.time() - start_time, 2)}초"
-
-        # ✅ 응답 내용 로그 저장
-        with open("response_log.json", "w", encoding="utf-8") as f:
-            json.dump({
-                "question": utterance,
-                "answer": answer,
-                "elapsed_time": elapsed
-            }, f, ensure_ascii=False, indent=2)
-
-        return jsonify(response)
+        })
 
     except Exception as e:
         return jsonify({
@@ -81,44 +70,67 @@ def webhook():
             }
         })
 
-# ✅ GPT 결과 웹페이지 출력 (/go)
-@app.route("/go")
-def show_gpt_response():
+# ✅ GPT 생성 비동기 함수
+def run_gpt_thread(utterance):
     try:
-        with open("response_log.json", "r", encoding="utf-8") as f:
-            data = json.load(f)
+        global start_time
+        start_time = time.time()
+
+        thread = openai.beta.threads.create()
+        thread_id = thread.id
+
+        openai.beta.threads.messages.create(
+            thread_id=thread_id,
+            role="user",
+            content=utterance
+        )
+
+        run = openai.beta.threads.runs.create(
+            thread_id=thread_id,
+            assistant_id=ASSISTANT_ID
+        )
+
+        for _ in range(10):
+            run_status = openai.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
+            if run_status.status == "completed":
+                break
+            time.sleep(1)
+
+        messages = openai.beta.threads.messages.list(thread_id=thread_id)
+        answer = messages.data[0].content[0].text.value
+
+        save_response_log(utterance, answer)
+
+    except Exception as e:
+        save_response_log(utterance, f"[GPT 오류] {str(e)}")
+
+# ✅ 웹 페이지로 결과 보여주는 라우트
+@app.route("/response")
+def response_page():
+    try:
+        with open("responses.txt", "r", encoding="utf-8") as f:
+            content = f.read()
     except FileNotFoundError:
-        data = {
-            "question": "아직 질문이 없습니다.",
-            "answer": "아직 생성된 답변이 없습니다.",
-            "elapsed_time": "-"
-        }
+        content = "아직 응답 기록이 없습니다."
 
     html_template = """
     <!DOCTYPE html>
-    <html lang="ko">
+    <html lang=\"ko\">
     <head>
-        <meta charset="UTF-8">
-        <title>후비 GPT 응답</title>
+        <meta charset=\"UTF-8\">
+        <title>후비 GPT 응답 기록</title>
         <style>
             body { font-family: sans-serif; padding: 2rem; background-color: #f9f9f9; }
-            .box { background: #fff; padding: 2rem; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-            h1 { color: #222; }
-            p { font-size: 1.1rem; margin-bottom: 1rem; }
-            strong { color: #444; }
+            .box { background: #fff; padding: 2rem; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); white-space: pre-wrap; }
         </style>
     </head>
     <body>
-        <h1>🤖 후비 GPT 응답</h1>
-        <div class="box">
-            <p><strong>질문:</strong> {{ question }}</p>
-            <p><strong>답변:</strong> {{ answer }}</p>
-            <p><strong>응답 시간:</strong> {{ elapsed_time }}</p>
-        </div>
+        <h1>🤖 후비 GPT 응답 기록</h1>
+        <div class=\"box\">{{ content }}</div>
     </body>
     </html>
     """
-    return render_template_string(html_template, **data)
+    return render_template_string(html_template, content=content)
 
 if __name__ == "__main__":
     app.run()
