@@ -13,7 +13,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return "✅ GPT 연결된 Flask 서버입니다!"
+    return "✅ GPT Assistant 연결됨!"
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
@@ -38,18 +38,18 @@ def webhook():
             assistant_id=ASSISTANT_ID
         )
 
-        # 실행 완료 대기 (최대 10초 루프)
-        for _ in range(10):
+        # 실행 완료 대기 (최대 2.5초)
+        for _ in range(5):  # 줄임
             run_status = openai.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
             if run_status.status == "completed":
                 break
-            time.sleep(1)
+            time.sleep(0.5)  # 빠르게 체크
         else:
             return jsonify({
                 "version": "2.0",
                 "template": {
                     "outputs": [
-                        {"simpleText": {"text": "⚠️ GPT 응답 시간이 초과되었습니다."}}
+                        {"simpleText": {"text": "⏳ GPT 응답이 지연되고 있어요. 잠시만 기다려 주세요!"}}
                     ]
                 }
             })
