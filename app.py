@@ -21,6 +21,9 @@ def webhook():
         user_input = request.get_json()
         utterance = user_input['userRequest']['utterance']
 
+        # ✅ GPT 응답 속도 측정 시작
+        start_time = time.time()
+
         # GPT Assistant: thread 생성
         thread = openai.beta.threads.create()
         thread_id = thread.id
@@ -39,11 +42,11 @@ def webhook():
         )
 
         # 실행 완료 대기 (최대 2.5초)
-        for _ in range(5):  # 줄임
+        for _ in range(5):
             run_status = openai.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
             if run_status.status == "completed":
                 break
-            time.sleep(0.5)  # 빠르게 체크
+            time.sleep(0.5)
         else:
             return jsonify({
                 "version": "2.0",
@@ -53,6 +56,11 @@ def webhook():
                     ]
                 }
             })
+
+        # ✅ 응답 시간 측정 완료
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        print(f"💡 GPT Assistant 응답 시간: {elapsed_time:.2f}초")  # Render 로그에서 확인
 
         # 응답 추출
         messages = openai.beta.threads.messages.list(thread_id=thread_id)
@@ -79,3 +87,4 @@ def webhook():
 
 if __name__ == "__main__":
     app.run()
+
