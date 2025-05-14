@@ -15,9 +15,10 @@ app = Flask(__name__)
 def home():
     return "✅ GPT 연결된 Flask 서버입니다!"
 
+# ✅ GPT 비동기 실행 및 파일 저장
 def run_gpt_thread(utterance):
     try:
-        start_time = time.time()  # ⏱️ 시작 시각
+        start_time = time.time()
 
         thread = openai.beta.threads.create()
         thread_id = thread.id
@@ -42,8 +43,7 @@ def run_gpt_thread(utterance):
         messages = openai.beta.threads.messages.list(thread_id=thread_id)
         answer = messages.data[0].content[0].text.value
 
-        end_time = time.time()  # ⏱️ 종료 시각
-        elapsed = round(end_time - start_time, 2)  # 소수점 2자리
+        elapsed = round(time.time() - start_time, 2)
 
         with open("gpt_response.txt", "w", encoding="utf-8") as f:
             f.write(f"[입력]\n{utterance}\n\n[응답]\n{answer}\n\n[소요 시간] {elapsed}초")
@@ -52,6 +52,7 @@ def run_gpt_thread(utterance):
         with open("gpt_response.txt", "w", encoding="utf-8") as f:
             f.write(f"[GPT 오류] {str(e)}")
 
+# ✅ Webhook 요청 응답
 @app.route("/webhook", methods=["POST"])
 def webhook():
     try:
@@ -78,6 +79,16 @@ def webhook():
                 ]
             }
         })
+
+# ✅ 저장된 GPT 응답을 웹에서 확인하는 경로
+@app.route("/response", methods=["GET"])
+def response_view():
+    try:
+        with open("gpt_response.txt", "r", encoding="utf-8") as f:
+            content = f.read()
+        return f"<pre>{content}</pre>"
+    except Exception as e:
+        return f"파일을 불러올 수 없습니다: {str(e)}"
 
 if __name__ == "__main__":
     app.run()
