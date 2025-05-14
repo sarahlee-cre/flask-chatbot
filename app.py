@@ -146,38 +146,51 @@ def ask():
     try:
         message = request.json.get("message", "")
 
-        # 세션에 thread_id 없으면 새로 생성
         if "thread_id" not in session:
             thread = openai.beta.threads.create()
             session["thread_id"] = thread.id
         thread_id = session["thread_id"]
 
-        # 사용자 메시지 전송
-        openai.beta.threads.messages.create(thread_id=thread_id, role="user", content=message)
+        openai.beta.threads.messages.create(
+            thread_id=thread_id,
+            role="user",
+            content=message
+        )
 
-        # GPT Assistant 실행
-        run = openai.beta.threads.runs.create(thread_id=thread_id, assistant_id=ASSISTANT_ID)
+        run = openai.beta.threads.runs.create(
+            thread_id=thread_id,
+            assistant_id=ASSISTANT_ID
+        )
 
-        for _ in range(10):
-            status = openai.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
+        # 최대 30초까지 대기
+        for _ in range(30):
+            status = openai.beta.threads.runs.retrieve(
+                thread_id=thread_id,
+                run_id=run.id
+            )
             if status.status == "completed":
                 break
             time.sleep(1)
 
-        # 응답 추출
+        # 🔁 모든 assistant 메시지 이어붙이기
         messages = openai.beta.threads.messages.list(thread_id=thread_id)
-        answer = messages.data[0].content[0].text.value
+        answer = ""
+        for msg in reversed(messages.data):  # 최신부터 확인
+            if msg.role == "assistant":
+                for part in msg.content:
+                    if part.type == "text":
+                        answer += part.text.value.strip() + "\n"
 
-        return jsonify({"answer": answer})
+        return jsonify({"answer": answer.strip()})
 
     except Exception as e:
         return jsonify({"answer": f"오류 발생: {str(e)}"})
 
-# 🌐 정적 파일 제공 (PWA 관련)
+# 🌐 정적 파일 제공
 @app.route("/static/<path:filename>")
 def static_files(filename):
     return send_from_directory("static", filename)
 
-# 🖥 개발용 실행
+# 🖥 실행
 if __name__ == "__main__":
     app.run()
