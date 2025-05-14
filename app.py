@@ -1,11 +1,10 @@
 import os
-from flask import Flask, request, jsonify
+import threading
 import openai
-import time
+from flask import Flask, request, jsonify
 from dotenv import load_dotenv
 
 load_dotenv()
-
 openai.api_key = os.getenv("OPENAI_API_KEY")
 ASSISTANT_ID = os.getenv("ASSISTANT_ID")
 
@@ -13,7 +12,32 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return "✅ GPT Assistant 연결됨!"
+    return "✅ GPT 연결된 Flask 서버입니다!"
+
+def run_gpt_thread(utterance):
+    try:
+        thread = openai.beta.threads.create()
+        thread_id = thread.id
+
+        openai.beta.threads.messages.create(
+            thread_id=thread_id,
+            role="user",
+            content=utterance
+        )
+
+        run = openai.beta.threads.runs.create(
+            thread_id=thread_id,
+            assistant_id=ASSISTANT_ID
+        )
+
+        # 최대 5초 대기
+        for _ in range(5):
+            run_status = openai.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
+            if run_status.status == "completed":
+                break
+
+    except Exception as e:
+        print(f"[GPT 처리 오류] {e}")
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
@@ -21,56 +45,15 @@ def webhook():
         user_input = request.get_json()
         utterance = user_input['userRequest']['utterance']
 
-        # ✅ GPT 응답 속도 측정 시작
-        start_time = time.time()
+        # GPT 처리는 비동기적으로 실행
+        threading.Thread(target=run_gpt_thread, args=(utterance,)).start()
 
-        # GPT Assistant: thread 생성
-        thread = openai.beta.threads.create()
-        thread_id = thread.id
-
-        # 사용자 발화 메시지 추가
-        openai.beta.threads.messages.create(
-            thread_id=thread_id,
-            role="user",
-            content=utterance
-        )
-
-        # GPT 실행
-        run = openai.beta.threads.runs.create(
-            thread_id=thread_id,
-            assistant_id=ASSISTANT_ID
-        )
-
-        # 실행 완료 대기 (최대 2.5초)
-        for _ in range(5):
-            run_status = openai.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
-            if run_status.status == "completed":
-                break
-            time.sleep(0.5)
-        else:
-            return jsonify({
-                "version": "2.0",
-                "template": {
-                    "outputs": [
-                        {"simpleText": {"text": "⏳ GPT 응답이 지연되고 있어요. 잠시만 기다려 주세요!"}}
-                    ]
-                }
-            })
-
-        # ✅ 응답 시간 측정 완료
-        end_time = time.time()
-        elapsed_time = end_time - start_time
-        print(f"💡 GPT Assistant 응답 시간: {elapsed_time:.2f}초")  # Render 로그에서 확인
-
-        # 응답 추출
-        messages = openai.beta.threads.messages.list(thread_id=thread_id)
-        answer = messages.data[0].content[0].text.value
-
+        # 우선 응답
         return jsonify({
             "version": "2.0",
             "template": {
                 "outputs": [
-                    {"simpleText": {"text": answer}}
+                    {"simpleText": {"text": "🤖 GPT 응답을 생성 중이에요. 잠시만 기다려주세요!"}}
                 ]
             }
         })
@@ -87,4 +70,3 @@ def webhook():
 
 if __name__ == "__main__":
     app.run()
-
