@@ -2,7 +2,7 @@ import os
 import threading
 import openai
 import time
-from flask import Flask, request, jsonify, render_template_string
+from flask import Flask, request, jsonify, render_template_string, send_from_directory
 from dotenv import load_dotenv
 from datetime import datetime
 
@@ -10,11 +10,12 @@ load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 ASSISTANT_ID = os.getenv("ASSISTANT_ID")
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="static")
 
 # ✅ GPT 응답 저장 함수
-def save_response_log(utterance, answer, elapsed):
+def save_response_log(utterance, answer):
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    elapsed = round(time.time() - start_time, 2)
     with open("responses.txt", "w", encoding="utf-8") as f:
         f.write(f"[시간] {now}\n[질문] {utterance}\n[답변] {answer}\n[응답 시간] {elapsed}초\n")
 
@@ -34,9 +35,38 @@ def load_latest_response():
     except FileNotFoundError:
         return "🤖 후비 답변: 아직 응답 기록이 없습니다."
 
-@app.route("/")
-def home():
-    return "✅ GPT 연결된 Flask 서버입니다!"
+@app.route("/install")
+def install_page():
+    html_template = """
+    <!DOCTYPE html>
+    <html lang="ko">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="theme-color" content="#ffffff">
+        <link rel="manifest" href="/static/manifest.json">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap">
+        <title>후비 챗봇 설치</title>
+        <script>
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/static/sw.js');
+                });
+            }
+        </script>
+        <style>
+            body { font-family: 'Noto Sans KR', sans-serif; text-align: center; padding: 2rem; background-color: #f4f4f4; }
+            h1 { margin-bottom: 1rem; }
+            p { font-size: 1.2rem; color: #333; }
+        </style>
+    </head>
+    <body>
+        <h1>🤖 HUBI GPT 챗봇</h1>
+        <p>PWA 설치가 가능한 챗봇입니다.<br>홈 화면에 추가하여 앱처럼 사용할 수 있어요!</p>
+    </body>
+    </html>
+    """
+    return render_template_string(html_template)
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
@@ -79,6 +109,7 @@ def webhook():
 # ✅ GPT 생성 비동기 함수
 def run_gpt_thread(utterance):
     try:
+        global start_time
         start_time = time.time()
 
         thread = openai.beta.threads.create()
@@ -104,39 +135,14 @@ def run_gpt_thread(utterance):
         messages = openai.beta.threads.messages.list(thread_id=thread_id)
         answer = messages.data[0].content[0].text.value
 
-        elapsed = round(time.time() - start_time, 2)
-        save_response_log(utterance, answer, elapsed)
+        save_response_log(utterance, answer)
 
     except Exception as e:
-        save_response_log(utterance, f"[GPT 오류] {str(e)}", 0)
+        save_response_log(utterance, f"[GPT 오류] {str(e)}")
 
-# ✅ 웹 페이지로 결과 보여주는 라우트
-@app.route("/response")
-def response_page():
-    try:
-        with open("responses.txt", "r", encoding="utf-8") as f:
-            content = f.read()
-    except FileNotFoundError:
-        content = "아직 응답 기록이 없습니다."
-
-    html_template = """
-    <!DOCTYPE html>
-    <html lang=\"ko\">
-    <head>
-        <meta charset=\"UTF-8\">
-        <title>후비 GPT 응답 기록</title>
-        <style>
-            body { font-family: sans-serif; padding: 2rem; background-color: #f9f9f9; }
-            .box { background: #fff; padding: 2rem; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); white-space: pre-wrap; }
-        </style>
-    </head>
-    <body>
-        <h1>🤖 후비 GPT 응답 기록</h1>
-        <div class=\"box\">{{ content }}</div>
-    </body>
-    </html>
-    """
-    return render_template_string(html_template, content=content)
+@app.route("/static/<path:filename>")
+def static_files(filename):
+    return send_from_directory("static", filename)
 
 if __name__ == "__main__":
     app.run()
