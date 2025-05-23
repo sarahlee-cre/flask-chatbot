@@ -173,10 +173,10 @@ def install():
             <button class="search-btn" onclick="viewHistory()">🔍</button>
         </header>
         <div id="chat-box">
-            <div class="bubble bot"><img class='bot-icon' src='/static/icons/icon3.png'> 안녕하세요! 저는 한국외대 챗봇 후비입니다. 무엇을 도와드릴까요?😊<br>
- Hello! I'm HUBee, the HUFS chatbot. How can I help you today? 😊<br>
- 你好！我是韩国外国语大学聊天机器人HUBee。请问有什么可以帮您的吗？😊<br>
- こんにちは！私は韓国外国語大学のチャットボットHUBeeです。ご用件をどうぞ😊<br>
+            <div class="bubble bot"><img class='bot-icon' src='/static/icons/icon3.png'> 안녕하세요! 저는 한국외대 챗봇 후비입니다. 무엇을 도와드릴까요?😊
+ Hello! I'm HUBee, the HUFS chatbot. How can I help you today? 😊
+ 你好！我是韩国外国语大学聊天机器人HUBee。请问有什么可以帮您的吗？😊
+ こんにちは！私は韓国外国語大学のチャットボットHUBeeです。ご用件をどうぞ😊
  Xin chào! Tôi là HUBee, chatbot của Đại học Ngoại ngữ Hàn Quốc. Tôi có thể giúp gì cho bạn? 😊</div>
         </div>
         <div id="input-area">
