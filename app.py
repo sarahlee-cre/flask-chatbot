@@ -52,7 +52,7 @@ def install():
                 });
 
                 const data = await res.json();
-                chatBox.innerHTML += `<div class='bubble bot'><img class='bot-icon' src='/static/icons/icon3.png'> ${data.answer.replace(/\n/g, '<br>')}</div>`;
+                chatBox.innerHTML += `<div class='bubble bot'><img class='bot-icon' src='/static/icons/icon3.png'> ${data.answer.replace(/\\n/g, '<br>')}</div>`;
                 chatBox.scrollTop = chatBox.scrollHeight;
                 history.push({ role: 'bot', content: data.answer });
             }
