@@ -10,7 +10,7 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 ASSISTANT_ID = os.getenv("ASSISTANT_ID")
 
 app = Flask(__name__, static_folder="static")
-app.secret_key = os.getenv("FLASK_SECRET_KEY", "hubi-temp-secret")  # 세션 유지용 시크릿 키
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "hubi-temp-secret")  # 세션 유지용 시크릴 키
 
 @app.route("/install")
 def install():
@@ -168,6 +168,10 @@ def install():
                 align-items: center;
                 justify-content: center;
             }
+            #send-btn svg, #end-btn svg {
+                width: 24px;
+                height: 24px;
+            }
         </style>
     </head>
     <body>
@@ -181,20 +185,20 @@ def install():
  Hello! I'm HUBee, the HUFS chatbot. How can I help you today? 😊
  你好！我是韩国外国语大学聊天机器人HUBee。请问有什么可以帮您的吗？😊
  こんにちは！私は韓国外国語大学のチャットボットHUBeeです。ご用件をどうぞ😊
- Xin chào! Tôi là HUBee, chatbot của Đại học Ngoại ngữ Hàn Quốc. Tôi có thể giúp gì cho bạn? 😊</div>
+ Xin chào! Tôi là HUBee, chatbot của Đại học Ngoại ngữ Hàn Quốc. Tôi có thể giúp gì cho bạn? 😊
+</div>
         </div>
         <div id="input-area">
             <input id="userInput" placeholder="질문을 입력하세요" />
             <button id="send-btn" onclick="sendToGPT()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="12" r="12" fill="#007bff"/>
-                    <path d="M8 6l8 6-8 6V6z" fill="white"/>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                    <path d="M3 2v20l19-10L3 2z" />
                 </svg>
             </button>
             <button id="end-btn" onclick="clearChat()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="12" r="12" fill="#FF3B30"/>
-                    <rect x="7" y="7" width="10" height="10" fill="white" rx="2"/>
+                <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'>
+                    <circle cx='20' cy='20' r='20' fill='#FF3B30'/>
+                    <rect x='10' y='10' width='20' height='20' fill='white' rx='2'/>
                 </svg>
             </button>
         </div>
@@ -251,4 +255,3 @@ def static_files(filename):
 
 if __name__ == "__main__":
     app.run()
-
