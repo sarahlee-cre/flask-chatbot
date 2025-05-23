@@ -4,46 +4,46 @@ import openai
 from flask import Flask, request, jsonify, render_template_string, send_from_directory, session
 from dotenv import load_dotenv
 
-# .env 파일의 환경변수 불러오기
+# 환경변수 로드
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 ASSISTANT_ID = os.getenv("ASSISTANT_ID")
 
 app = Flask(__name__, static_folder="static")
-app.secret_key = os.getenv("FLASK_SECRET_KEY", "hubi-temp-secret")  # 세션 유지용 시크릿 키
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "hubi-temp-secret")
 
-# 📄 메인 페이지 (채팅 + PWA)
 @app.route("/install")
 def install():
     session.clear()
     html_template = """
     <!DOCTYPE html>
-    <html lang="ko">
+    <html lang='ko'>
     <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta charset='UTF-8'>
+        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
         <title>후비 HUBI</title>
-        <link rel="manifest" href="/static/manifest.json" />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap" />
-        <meta name="theme-color" content="#ffffff" />
+        <link rel='manifest' href='/static/manifest.json'>
+        <link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap'>
+        <meta name='theme-color' content='#ffffff'>
         <script>
-            // 서비스워커 등록 (PWA용)
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
                     navigator.serviceWorker.register('/static/sw.js');
                 });
             }
 
-            // GPT에 메시지 보내기
+            let history = [];
+
             async function sendToGPT() {
                 const inputEl = document.getElementById("userInput");
                 const userInput = inputEl.value.trim();
                 if (!userInput) return;
 
                 const chatBox = document.getElementById("chat-box");
-                chatBox.innerHTML += `<div class="bubble user">🙋‍♀️ ${userInput}</div>`;
+                chatBox.innerHTML += `<div class='bubble user'>🙋‍♀️ ${userInput}</div>`;
                 inputEl.value = "";
                 chatBox.scrollTop = chatBox.scrollHeight;
+                history.push({ role: 'user', content: userInput });
 
                 const res = await fetch("/ask", {
                     method: "POST",
@@ -52,8 +52,18 @@ def install():
                 });
 
                 const data = await res.json();
-                chatBox.innerHTML += `<div class="bubble bot">🤖 ${data.answer}</div>`;
+                chatBox.innerHTML += `<div class='bubble bot'><img class='bot-icon' src='/static/icons/icon3.png'> ${data.answer.replace(/\n/g, '<br>')}</div>`;
                 chatBox.scrollTop = chatBox.scrollHeight;
+                history.push({ role: 'bot', content: data.answer });
+            }
+
+            function clearChat() {
+                document.getElementById("chat-box").innerHTML = "";
+                history = [];
+            }
+
+            function viewHistory() {
+                alert(history.map(h => `${h.role === 'user' ? '🙋‍♀️' : '🤖'} ${h.content}`).join('\n\n'));
             }
         </script>
         <style>
@@ -61,37 +71,41 @@ def install():
                 font-family: 'Noto Sans KR', sans-serif;
                 margin: 0;
                 padding: 0;
-                background: #f2f2f2;
+                background: #eaf6ff;
                 display: flex;
                 flex-direction: column;
                 height: 100vh;
             }
             header {
                 background: #ffffff;
-                padding: 1rem;
+                padding: 1rem 2rem;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
                 border-bottom: 1px solid #ddd;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                text-align: center;
             }
-            .header-content {
+            .logo-title {
                 display: flex;
-                flex-direction: column;
                 align-items: center;
+                gap: 0.75rem;
             }
             .logo {
                 height: 40px;
-                margin-bottom: 0.3rem;
             }
             .title {
                 font-weight: bold;
+                font-size: 1.3rem;
+            }
+            .search-btn {
+                border: none;
+                background: none;
+                cursor: pointer;
                 font-size: 1.2rem;
             }
             #chat-box {
                 flex: 1;
                 overflow-y: auto;
-                padding: 1rem;
+                padding: 1rem 2rem;
                 display: flex;
                 flex-direction: column;
                 gap: 0.5rem;
@@ -107,14 +121,20 @@ def install():
             }
             .user {
                 align-self: flex-end;
-                background: #d0f0ff;
-                color: #000;
+                background: #003b6f;
+                color: #fff;
             }
             .bot {
                 align-self: flex-start;
-                background: #fff;
+                background: #ffffff;
                 border: 1px solid #ddd;
                 color: #333;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+            .bot-icon {
+                height: 22px;
             }
             #input-area {
                 display: flex;
@@ -138,36 +158,29 @@ def install():
                 color: white;
                 cursor: pointer;
             }
-            button:hover {
-                background-color: #004999;
-            }
         </style>
     </head>
     <body>
         <header>
-            <div class="header-content">
-                <img src="/static/icons/icon3.png" class="logo" alt="로고" />
+            <div class="logo-title">
+                <img src="/static/icons/hufs.png" class="logo" alt="로고">
                 <div class="title">HUFS 비서, HUBEE</div>
             </div>
+            <button class="search-btn" onclick="viewHistory()">🔍</button>
         </header>
         <div id="chat-box">
-            <div class="bubble bot">안녕하세요! 저는 한국외대 챗봇 후비입니다. 무엇을 도와드릴까요?😊/n
- Hello! I'm HUBee, the HUFS chatbot. How can I help you today? 😊/n
- 你好！我是韩国外国语大学聊天机器人HUBee。请问有什么可以帮您的吗？😊/n
- こんにちは！私は韓国外国語大学のチャットボットHUBeeです。ご用件をどうぞ😊/n
- Xin chào! Tôi là HUBee, chatbot của Đại học Ngoại ngữ Hàn Quốc. Tôi có thể giúp gì cho bạn? 😊
-</div>
+            <div class="bubble bot"><img class='bot-icon' src='/static/icons/icon3.png'> 안녕하세요! 저는 한국외대 챗봇 후비입니다. 무엇을 도와드릴까요? 😊</div>
         </div>
         <div id="input-area">
-            <input id="userInput" placeholder="질문을 입력하세요" />
+            <input id="userInput" placeholder="질문을 입력하세요">
             <button onclick="sendToGPT()">보내기</button>
+            <button onclick="clearChat()">끝</button>
         </div>
     </body>
     </html>
     """
     return render_template_string(html_template)
 
-# GPT 응답 처리 API
 @app.route("/ask", methods=["POST"])
 def ask():
     try:
@@ -210,12 +223,9 @@ def ask():
     except Exception as e:
         return jsonify({"answer": f"오류 발생: {str(e)}"})
 
-# 정적 파일 제공
 @app.route("/static/<path:filename>")
 def static_files(filename):
     return send_from_directory("static", filename)
 
-# 앱 실행
 if __name__ == "__main__":
     app.run()
-
