@@ -4,27 +4,28 @@ import openai
 from flask import Flask, request, jsonify, render_template_string, send_from_directory, session
 from dotenv import load_dotenv
 
-# 환경변수 로드
+# .env 파일의 환경변수 불러오기
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 ASSISTANT_ID = os.getenv("ASSISTANT_ID")
 
 app = Flask(__name__, static_folder="static")
-app.secret_key = os.getenv("FLASK_SECRET_KEY", "hubi-temp-secret")
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "hubi-temp-secret")  # 세션 유지용 시크릿 키
 
+# 메인 페이지 라우터 (채팅 UI + PWA)
 @app.route("/install")
 def install():
     session.clear()
     html_template = """
     <!DOCTYPE html>
-    <html lang='ko'>
+    <html lang=\"ko\">
     <head>
-        <meta charset='UTF-8'>
-        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+        <meta charset=\"UTF-8\" />
+        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />
         <title>후비 HUBI</title>
-        <link rel='manifest' href='/static/manifest.json'>
-        <link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap'>
-        <meta name='theme-color' content='#ffffff'>
+        <link rel=\"manifest\" href=\"/static/manifest.json\" />
+        <link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap\" />
+        <meta name=\"theme-color\" content=\"#ffffff\" />
         <script>
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
@@ -81,8 +82,9 @@ def install():
                 padding: 1rem 2rem;
                 display: flex;
                 align-items: center;
-                justify-content: space-between;
+                justify-content: center;
                 border-bottom: 1px solid #ddd;
+                position: relative;
             }
             .logo-title {
                 display: flex;
@@ -101,6 +103,8 @@ def install():
                 background: none;
                 cursor: pointer;
                 font-size: 1.2rem;
+                position: absolute;
+                right: 1.5rem;
             }
             #chat-box {
                 flex: 1;
@@ -163,7 +167,7 @@ def install():
     <body>
         <header>
             <div class="logo-title">
-                <img src="/static/icons/hufs.png" class="logo" alt="로고">
+                <img src="/static/icons/hufs.png" class="logo" alt="로고" />
                 <div class="title">HUFS 비서, HUBEE</div>
             </div>
             <button class="search-btn" onclick="viewHistory()">🔍</button>
@@ -172,7 +176,7 @@ def install():
             <div class="bubble bot"><img class='bot-icon' src='/static/icons/icon3.png'> 안녕하세요! 저는 한국외대 챗봇 후비입니다. 무엇을 도와드릴까요? 😊</div>
         </div>
         <div id="input-area">
-            <input id="userInput" placeholder="질문을 입력하세요">
+            <input id="userInput" placeholder="질문을 입력하세요" />
             <button onclick="sendToGPT()">보내기</button>
             <button onclick="clearChat()">끝</button>
         </div>
