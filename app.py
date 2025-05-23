@@ -64,7 +64,7 @@ def install():
             }
 
             function viewHistory() {
-                alert(history.map(h => `${h.role === 'user' ? '🙋‍♀️' : '🤖'} ${h.content}`).join('\n\n'));
+                alert(history.map(h => `${h.role === 'user' ? '🙋‍♀️' : '🤖'} ${h.content}`).join('\\n\\n'));
             }
 
             document.addEventListener("DOMContentLoaded", function () {

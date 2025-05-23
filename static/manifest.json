@@ -1,8 +1,11 @@
 {
   "name": "HUFS 비서, HUBEE",
   "short_name": "HUBEE",
+  "description": "한국외대 챗봇 후비(HUBEE)와 빠르게 소통하세요!",
+  "lang": "ko",
   "start_url": "/install",
   "display": "standalone",
+  "display_override": ["standalone", "browser"],
   "background_color": "#eaf6ff",
   "theme_color": "#ffffff",
   "orientation": "portrait",
