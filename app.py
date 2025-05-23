@@ -13,17 +13,17 @@ app.secret_key = os.getenv("FLASK_SECRET_KEY", "hubi-temp-secret")
 
 @app.route("/install")
 def install():
-    session.clear()  # 브라우저를 새로 열면 대화 새로 시작
+    session.clear()
     html_template = """
     <!DOCTYPE html>
     <html lang=\"ko\">
     <head>
-        <meta charset=\"UTF-8\" />
-        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />
+        <meta charset=\"UTF-8\">
+        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
         <title>HUFS 비서, HUBEE</title>
-        <link rel=\"manifest\" href=\"/static/manifest.json\" />
-        <link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap\" />
-        <meta name=\"theme-color\" content=\"#ffffff\" />
+        <link rel=\"manifest\" href=\"/static/manifest.json\">
+        <link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap\">
+        <meta name=\"theme-color\" content=\"#ffffff\">
         <script>
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
@@ -34,7 +34,6 @@ def install():
                 const inputEl = document.getElementById("userInput");
                 const userInput = inputEl.value.trim();
                 if (!userInput) return;
-
                 const chatBox = document.getElementById("chat-box");
                 chatBox.innerHTML += `<div class='bubble user'>🙋‍♀️ ${userInput}</div>`;
                 inputEl.value = "";
@@ -47,10 +46,9 @@ def install():
                 });
 
                 const data = await res.json();
-                chatBox.innerHTML += `<div class='bubble bot'>🤖 ${data.answer}</div>`;
+                chatBox.innerHTML += `<div class='bubble bot'><img class='bubble-icon' src='/static/icons/icon192.png' /> ${data.answer}</div>`;
                 chatBox.scrollTop = chatBox.scrollHeight;
             }
-
             function setExample() {
                 document.getElementById("userInput").value = "학사 일정 알려줘";
             }
@@ -75,6 +73,7 @@ def install():
             }
             .logo {
                 height: 40px;
+                margin-right: 0.5rem;
             }
             .title {
                 font-weight: bold;
@@ -99,14 +98,19 @@ def install():
             }
             .user {
                 align-self: flex-end;
-                background: #cce5ff;
-                color: #000;
+                background: #003b6f;
+                color: #fff;
             }
             .bot {
                 align-self: flex-start;
                 background: #fff;
                 border: 1px solid #ddd;
                 color: #333;
+            }
+            .bubble-icon {
+                height: 20px;
+                vertical-align: middle;
+                margin-right: 0.3rem;
             }
             #input-area {
                 display: flex;
@@ -139,12 +143,14 @@ def install():
     </head>
     <body>
         <header>
-            <img src="/static/logo.png" class="logo" alt="HUBEE 로고" />
-            <div class="title">HUFS 비서, HUBEE</div>
+            <div style="display: flex; align-items: center;">
+                <img src="/static/icons/icon192.png" class="logo" alt="HUBEE 로고" />
+                <div class="title">HUFS 비서, HUBEE</div>
+            </div>
             <button class="search-icon">🔍</button>
         </header>
         <div id="chat-box">
-            <div class="bubble bot">안녕하세요! 저는 한국외대 챗봇 후비입니다. 무엇을 도와드릴까요? 😊</div>
+            <div class="bubble bot"><img class='bubble-icon' src='/static/icons/icon192.png' /> 안녕하세요! 저는 한국외대 챗봇 후비입니다. 무엇을 도와드릴까요? 😊</div>
         </div>
         <div id="input-area">
             <button onclick="setExample()" class="example-btn">질문예시</button>
@@ -191,9 +197,12 @@ def ask():
             if msg.role == "assistant":
                 for part in msg.content:
                     if part.type == "text":
-                        answer += part.text.value.strip() + "\n"
+                        answer = part.text.value.strip()
+                        break
+                if answer:
+                    break
 
-        return jsonify({"answer": answer.strip()})
+        return jsonify({"answer": answer})
 
     except Exception as e:
         return jsonify({"answer": f"오류 발생: {str(e)}"})
