@@ -148,8 +148,8 @@ def install():
                 outline: none;
             }
             button {
-                width: 36px;
-                height: 36px;
+                width: 30px;
+                height: 30px;
                 padding: 0;
                 border: none;
                 border-radius: 50%;
@@ -191,12 +191,12 @@ def install():
         <div id="input-area">
             <input id="userInput" placeholder="질문을 입력하세요" />
             <button id="send-btn" onclick="sendToGPT()">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white">
                     <path d="M3 2v20l19-10L3 2z" />
                 </svg>
             </button>
             <button id="end-btn" onclick="clearChat()">
-                <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'>
+                <svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 40 40'>
                     <circle cx='20' cy='20' r='20' fill='#FF3B30'/>
                     <rect x='10' y='10' width='20' height='20' fill='white' rx='2'/>
                 </svg>
