@@ -12,7 +12,6 @@ ASSISTANT_ID = os.getenv("ASSISTANT_ID")
 app = Flask(__name__, static_folder="static")
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "hubi-temp-secret")  # 세션 유지용 시크릿 키
 
-# 메인 페이지 라우터 (채팅 UI + PWA)
 @app.route("/install")
 def install():
     session.clear()
@@ -83,13 +82,8 @@ def install():
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                position: relative;
                 border-bottom: 1px solid #ddd;
-            }
-            .logo-title {
-                display: flex;
-                align-items: center;
-                gap: 0.75rem;
+                gap: 0.5rem;
             }
             .logo {
                 height: 40px;
@@ -99,12 +93,12 @@ def install():
                 font-size: 1.3rem;
             }
             .search-btn {
-                position: absolute;
-                right: 2rem;
                 border: none;
                 background: none;
                 cursor: pointer;
                 font-size: 1.2rem;
+                position: absolute;
+                right: 2rem;
             }
             #chat-box {
                 flex: 1;
@@ -153,32 +147,33 @@ def install():
                 border-radius: 20px;
                 outline: none;
             }
-            .icon-button {
-                width: 40px;
-                height: 40px;
+            button {
+                width: 42px;
+                height: 42px;
+                padding: 0;
                 border: none;
                 border-radius: 50%;
-                margin-left: 0.5rem;
+                background-color: transparent;
+                cursor: pointer;
+            }
+            #send-btn {
+                background-color: #007bff;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                cursor: pointer;
             }
-            .send-button {
-                background-color: #007bff;
-            }
-            .stop-button {
-                background-color: red;
-                border-radius: 4px;
+            #end-btn {
+                background-color: #ff0000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
         </style>
     </head>
     <body>
         <header>
-            <div class="logo-title">
-                <img src="/static/icons/hufs.png" class="logo" alt="로고" />
-                <div class="title">HUFS 비서, HUBEE</div>
-            </div>
+            <img src="/static/icons/hufs.png" class="logo" alt="로고" />
+            <div class="title">HUFS 비서, HUBEE</div>
             <button class="search-btn" onclick="viewHistory()">🔍</button>
         </header>
         <div id="chat-box">
@@ -186,16 +181,17 @@ def install():
  Hello! I'm HUBee, the HUFS chatbot. How can I help you today? 😊
  你好！我是韩国外国语大学聊天机器人HUBee。请问有什么可以帮您的吗？😊
  こんにちは！私は韓国外国語大学のチャットボットHUBeeです。ご用件をどうぞ😊
- Xin chào! Tôi là HUBee, chatbot của Đại học Ngoại ngữ Hàn Quốc. Tôi có thể giúp gì cho bạn? 😊</div>
+ Xin chào! Tôi là HUBee, chatbot của Đại học Ngoại ngữ Hàn Quốc. Tôi có thể giúp gì cho bạn? 😊
+</div>
         </div>
         <div id="input-area">
             <input id="userInput" placeholder="질문을 입력하세요" />
-            <button class="icon-button send-button" onclick="sendToGPT()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M3 2v20l19-10L3 2z" fill="#00AEEF"/>
+            <button id="send-btn" onclick="sendToGPT()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none">
+                    <path d="M3 2v20l19-10L3 2z" fill="#ffffff"/>
                 </svg>
             </button>
-            <button class="icon-button stop-button" onclick="clearChat()"></button>
+            <button id="end-btn" onclick="clearChat()"></button>
         </div>
     </body>
     </html>
