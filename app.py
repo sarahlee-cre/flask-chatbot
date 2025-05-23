@@ -40,7 +40,7 @@ def install():
                 if (!userInput) return;
 
                 const chatBox = document.getElementById("chat-box");
-                chatBox.innerHTML += `<div class='bubble user'>🙋‍♀️ ${userInput}</div>`;
+                chatBox.innerHTML += "<div class='bubble user'>🙋‍♀️ " + userInput + "</div>";
                 inputEl.value = "";
                 chatBox.scrollTop = chatBox.scrollHeight;
                 history.push({ role: 'user', content: userInput });
@@ -52,7 +52,8 @@ def install():
                 });
 
                 const data = await res.json();
-                chatBox.innerHTML += `<div class='bubble bot'><img class='bot-icon' src='/static/icons/icon3.png'> ${data.answer.replace(/\\n/g, '<br>')}</div>`;
+                const formatted = data.answer.replace(/\n/g, '<br>');
+                chatBox.innerHTML += "<div class='bubble bot'><img class='bot-icon' src='/static/icons/icon3.png'> " + formatted + "</div>";
                 chatBox.scrollTop = chatBox.scrollHeight;
                 history.push({ role: 'bot', content: data.answer });
             }
