@@ -12,7 +12,6 @@ ASSISTANT_ID = os.getenv("ASSISTANT_ID")
 app = Flask(__name__, static_folder="static")
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "hubi-temp-secret")  # 세션 유지용 시크릿 키
 
-# 메인 페이지 라우터 (채팅 UI + PWA)
 @app.route("/install")
 def install():
     session.clear()
@@ -104,7 +103,7 @@ def install():
                 cursor: pointer;
                 font-size: 1.2rem;
                 position: absolute;
-                right: 1.5rem;
+                right: 2rem;
             }
             #chat-box {
                 flex: 1;
@@ -153,14 +152,15 @@ def install():
                 border-radius: 20px;
                 outline: none;
             }
-            button {
-                margin-left: 0.5rem;
-                padding: 0.6rem 1rem;
+            .icon-btn {
+                padding: 0.5rem;
                 border: none;
-                border-radius: 20px;
-                background-color: #0066cc;
-                color: white;
+                background: none;
                 cursor: pointer;
+            }
+            .icon-btn svg {
+                width: 24px;
+                height: 24px;
             }
         </style>
     </head>
@@ -173,7 +173,7 @@ def install():
             <button class="search-btn" onclick="viewHistory()">🔍</button>
         </header>
         <div id="chat-box">
-            <div class="bubble bot"><img class='bot-icon' src='/static/icons/icon3.png'> 안녕하세요! 저는 한국외대 챗봇 후비입니다. 무엇을 도와드릴까요?😊
+            <div class="bubble bot"><img class='bot-icon' src='/static/icons/icon3.png'>  안녕하세요! 저는 한국외대 챗봇 후비입니다. 무엇을 도와드릴까요?😊
  Hello! I'm HUBee, the HUFS chatbot. How can I help you today? 😊
  你好！我是韩国外国语大学聊天机器人HUBee。请问有什么可以帮您的吗？😊
  こんにちは！私は韓国外国語大学のチャットボットHUBeeです。ご用件をどうぞ😊
@@ -181,8 +181,17 @@ def install():
         </div>
         <div id="input-area">
             <input id="userInput" placeholder="질문을 입력하세요" />
-            <button onclick="sendToGPT()">보내기</button>
-            <button onclick="clearChat()">끝</button>
+            <button class="icon-btn" onclick="sendToGPT()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+                    <path d="M3 2v20l19-10L3 2z" fill="#00AEEF"/>
+                </svg>
+            </button>
+            <button class="icon-btn" onclick="clearChat()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black">
+                    <circle cx="12" cy="12" r="10" fill="black"/>
+                    <rect x="8" y="8" width="8" height="8" rx="2" fill="white"/>
+                </svg>
+            </button>
         </div>
     </body>
     </html>
