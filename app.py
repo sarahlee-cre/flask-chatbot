@@ -4,7 +4,6 @@ import openai
 from flask import Flask, request, jsonify, render_template_string, send_from_directory, session
 from dotenv import load_dotenv
 
-# 환경변수 불러오기
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 ASSISTANT_ID = os.getenv("ASSISTANT_ID")
@@ -12,33 +11,32 @@ ASSISTANT_ID = os.getenv("ASSISTANT_ID")
 app = Flask(__name__, static_folder="static")
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "hubi-temp-secret")
 
-# 📄 메인 페이지 (채팅 + PWA)
 @app.route("/install")
 def install():
+    session.clear()  # 브라우저를 새로 열면 대화 새로 시작
     html_template = """
     <!DOCTYPE html>
-    <html lang="ko">
+    <html lang=\"ko\">
     <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>후비 GPT 챗봇</title>
-        <link rel="manifest" href="/static/manifest.json" />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap" />
-        <meta name="theme-color" content="#ffffff" />
+        <meta charset=\"UTF-8\" />
+        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />
+        <title>HUFS 비서, HUBEE</title>
+        <link rel=\"manifest\" href=\"/static/manifest.json\" />
+        <link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap\" />
+        <meta name=\"theme-color\" content=\"#ffffff\" />
         <script>
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
                     navigator.serviceWorker.register('/static/sw.js');
                 });
             }
-
             async function sendToGPT() {
                 const inputEl = document.getElementById("userInput");
                 const userInput = inputEl.value.trim();
                 if (!userInput) return;
 
                 const chatBox = document.getElementById("chat-box");
-                chatBox.innerHTML += `<div class="bubble user">🙋‍♀️ ${userInput}</div>`;
+                chatBox.innerHTML += `<div class='bubble user'>🙋‍♀️ ${userInput}</div>`;
                 inputEl.value = "";
                 chatBox.scrollTop = chatBox.scrollHeight;
 
@@ -49,8 +47,12 @@ def install():
                 });
 
                 const data = await res.json();
-                chatBox.innerHTML += `<div class="bubble bot">🤖 ${data.answer}</div>`;
+                chatBox.innerHTML += `<div class='bubble bot'>🤖 ${data.answer}</div>`;
                 chatBox.scrollTop = chatBox.scrollHeight;
+            }
+
+            function setExample() {
+                document.getElementById("userInput").value = "학사 일정 알려줘";
             }
         </script>
         <style>
@@ -58,18 +60,25 @@ def install():
                 font-family: 'Noto Sans KR', sans-serif;
                 margin: 0;
                 padding: 0;
-                background: #f2f2f2;
+                background: #eaf6ff;
                 display: flex;
                 flex-direction: column;
                 height: 100vh;
             }
-            h1 {
-                text-align: center;
+            header {
+                background: #fff;
                 padding: 1rem;
-                background: #ffffff;
-                margin: 0;
-                font-size: 1.3rem;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
                 border-bottom: 1px solid #ddd;
+            }
+            .logo {
+                height: 40px;
+            }
+            .title {
+                font-weight: bold;
+                font-size: 1.2rem;
             }
             #chat-box {
                 flex: 1;
@@ -90,7 +99,7 @@ def install():
             }
             .user {
                 align-self: flex-end;
-                background: #d0f0ff;
+                background: #cce5ff;
                 color: #000;
             }
             .bot {
@@ -104,6 +113,14 @@ def install():
                 padding: 0.75rem;
                 background: #fff;
                 border-top: 1px solid #ccc;
+                align-items: center;
+            }
+            .example-btn, .file-icon, .send-btn {
+                background: none;
+                border: none;
+                cursor: pointer;
+                font-size: 1rem;
+                margin: 0 0.5rem;
             }
             #userInput {
                 flex: 1;
@@ -112,35 +129,35 @@ def install():
                 border-radius: 20px;
                 outline: none;
             }
-            button {
-                margin-left: 0.5rem;
-                padding: 0.6rem 1rem;
-                border: none;
-                border-radius: 20px;
+            .send-btn {
                 background-color: #0066cc;
                 color: white;
-                cursor: pointer;
-            }
-            button:hover {
-                background-color: #004999;
+                padding: 0.6rem 1rem;
+                border-radius: 20px;
             }
         </style>
     </head>
     <body>
-        <h1>🤖 HUBI GPT 챗봇</h1>
+        <header>
+            <img src="/static/logo.png" class="logo" alt="HUBEE 로고" />
+            <div class="title">HUFS 비서, HUBEE</div>
+            <button class="search-icon">🔍</button>
+        </header>
         <div id="chat-box">
             <div class="bubble bot">안녕하세요! 저는 한국외대 챗봇 후비입니다. 무엇을 도와드릴까요? 😊</div>
         </div>
         <div id="input-area">
+            <button onclick="setExample()" class="example-btn">질문예시</button>
+            <label for="fileUpload" class="file-icon">📎</label>
+            <input type="file" id="fileUpload" hidden />
             <input id="userInput" type="text" placeholder="메시지를 입력하세요..." onkeydown="if(event.key==='Enter') sendToGPT()" />
-            <button onclick="sendToGPT()">전송</button>
+            <button onclick="sendToGPT()" class="send-btn">전송</button>
         </div>
     </body>
     </html>
     """
     return render_template_string(html_template)
 
-# 💬 GPT 응답 API
 @app.route("/ask", methods=["POST"])
 def ask():
     try:
@@ -162,20 +179,15 @@ def ask():
             assistant_id=ASSISTANT_ID
         )
 
-        # 최대 30초까지 대기
         for _ in range(30):
-            status = openai.beta.threads.runs.retrieve(
-                thread_id=thread_id,
-                run_id=run.id
-            )
+            status = openai.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
             if status.status == "completed":
                 break
             time.sleep(1)
 
-        # 🔁 모든 assistant 메시지 이어붙이기
         messages = openai.beta.threads.messages.list(thread_id=thread_id)
         answer = ""
-        for msg in reversed(messages.data):  # 최신부터 확인
+        for msg in reversed(messages.data):
             if msg.role == "assistant":
                 for part in msg.content:
                     if part.type == "text":
@@ -186,11 +198,9 @@ def ask():
     except Exception as e:
         return jsonify({"answer": f"오류 발생: {str(e)}"})
 
-# 🌐 정적 파일 제공
 @app.route("/static/<path:filename>")
 def static_files(filename):
     return send_from_directory("static", filename)
 
-# 🖥 실행
 if __name__ == "__main__":
     app.run()
