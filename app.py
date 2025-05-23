@@ -148,8 +148,8 @@ def install():
                 outline: none;
             }
             button {
-                width: 42px;
-                height: 42px;
+                width: 36px;
+                height: 36px;
                 padding: 0;
                 border: none;
                 border-radius: 50%;
@@ -181,20 +181,20 @@ def install():
  Hello! I'm HUBee, the HUFS chatbot. How can I help you today? 😊
  你好！我是韩国外国语大学聊天机器人HUBee。请问有什么可以帮您的吗？😊
  こんにちは！私は韓国外国語大学のチャットボットHUBeeです。ご用件をどうぞ😊
- Xin chào! Tôi là HUBee, chatbot của Đại học Ngoại ngữ Hàn Quốc. Tôi có thể giúp gì cho bạn? 😊
-</div>
+ Xin chào! Tôi là HUBee, chatbot của Đại học Ngoại ngữ Hàn Quốc. Tôi có thể giúp gì cho bạn? 😊</div>
         </div>
         <div id="input-area">
             <input id="userInput" placeholder="질문을 입력하세요" />
             <button id="send-btn" onclick="sendToGPT()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none">
-                    <path d="M3 2v20l19-10L3 2z" fill="#ffffff"/>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="12" fill="#007bff"/>
+                    <path d="M8 6l8 6-8 6V6z" fill="white"/>
                 </svg>
             </button>
             <button id="end-btn" onclick="clearChat()">
-                <svg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 40 40'>
-                    <circle cx='20' cy='20' r='20' fill='#FF3B30'/>
-                    <rect x='12' y='12' width='16' height='16' fill='white'/>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="12" fill="#FF3B30"/>
+                    <rect x="7" y="7" width="10" height="10" fill="white" rx="2"/>
                 </svg>
             </button>
         </div>
@@ -251,3 +251,4 @@ def static_files(filename):
 
 if __name__ == "__main__":
     app.run()
+
