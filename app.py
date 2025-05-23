@@ -140,7 +140,7 @@ def install():
                 padding: 0.75rem;
                 background: #fff;
                 border-top: 1px solid #ccc;
-                gap: 0.5rem;
+                gap: 0.75rem;
             }
             #userInput {
                 flex: 1;
@@ -196,7 +196,7 @@ def install():
             <button id="end-btn" onclick="clearChat()">
                 <svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 40 40'>
                     <circle cx='20' cy='20' r='20' fill='#FF3B30'/>
-                    <rect x='10' y='10' width='25' height='25' fill='white' rx='2'/>
+                    <rect x='8' y='8' width='24' height='24' fill='white' rx='2'/>
                 </svg>
             </button>
         </div>
