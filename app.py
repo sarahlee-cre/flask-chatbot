@@ -65,6 +65,24 @@ def install():
             function viewHistory() {
                 alert(history.map(h => `${h.role === 'user' ? '🙋‍♀️' : '🤖'} ${h.content}`).join('\n\n'));
             }
+
+            document.addEventListener("DOMContentLoaded", function () {
+                const toggleBtn = document.getElementById("toggleExamples");
+                const list = document.getElementById("exampleList");
+
+                toggleBtn.addEventListener("click", () => {
+                    list.style.display = list.style.display === "none" ? "block" : "none";
+                });
+
+                document.querySelectorAll(".example-question").forEach(btn => {
+                    btn.addEventListener("click", () => {
+                        const text = btn.innerText;
+                        document.getElementById("userInput").value = text;
+                        list.style.display = "none";
+                        sendToGPT();
+                    });
+                });
+            });
         </script>
         <style>
             body {
@@ -177,6 +195,19 @@ def install():
                 align-items: center;
                 justify-content: center;
             }
+            .example-question {
+                display: block;
+                width: 100%;
+                text-align: left;
+                padding: 6px 12px;
+                background-color: #f9f9f9;
+                border: none;
+                font-size: 0.9rem;
+                cursor: pointer;
+            }
+            .example-question:hover {
+                background-color: #eef6ff;
+            }
         </style>
     </head>
     <body>
@@ -200,6 +231,18 @@ def install():
 </div>
         </div>
         <div id="input-area">
+            <div style="position: relative;">
+                <button id="toggleExamples" style="padding: 6px 10px; border-radius: 20px; background-color: #e7f0ff; border: 1px solid #a5cfff; cursor: pointer;">
+                    💬
+                </button>
+                <div id="exampleList" style="display: none; position: absolute; bottom: 45px; left: 0; background: white; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); z-index: 10; white-space: nowrap;">
+                    <button class="example-question">학교 주변 맛집 알고싶어</button><br />
+                    <button class="example-question">오늘 학식 뭐야?</button><br />
+                    <button class="example-question">기숙사 신청은 언제 해?</button><br />
+                    <button class="example-question">교환학생 가고싶어!</button><br />
+                    <button class="example-question">시험기간 언제야?</button>
+                </div>
+            </div>
             <input id="userInput" placeholder="질문을 입력하세요" />
             <button id="send-btn" onclick="sendToGPT()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none">
