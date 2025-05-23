@@ -10,7 +10,7 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 ASSISTANT_ID = os.getenv("ASSISTANT_ID")
 
 app = Flask(__name__, static_folder="static")
-app.secret_key = os.getenv("FLASK_SECRET_KEY", "hubi-temp-secret")  # 세션 유지용 시크릴 키
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "hubi-temp-secret")  # 세션 유지용 시크릿 키
 
 @app.route("/install")
 def install():
@@ -139,6 +139,7 @@ def install():
                 padding: 0.75rem;
                 background: #fff;
                 border-top: 1px solid #ccc;
+                gap: 0.5rem;
             }
             #userInput {
                 flex: 1;
@@ -148,8 +149,8 @@ def install():
                 outline: none;
             }
             button {
-                width: 30px;
-                height: 30px;
+                width: 42px;
+                height: 42px;
                 padding: 0;
                 border: none;
                 border-radius: 50%;
@@ -167,10 +168,6 @@ def install():
                 display: flex;
                 align-items: center;
                 justify-content: center;
-            }
-            #send-btn svg, #end-btn svg {
-                width: 24px;
-                height: 24px;
             }
         </style>
     </head>
@@ -191,8 +188,8 @@ def install():
         <div id="input-area">
             <input id="userInput" placeholder="질문을 입력하세요" />
             <button id="send-btn" onclick="sendToGPT()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white">
-                    <path d="M3 2v20l19-10L3 2z" />
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M3 2v20l19-10L3 2z" fill="#ffffff"/>
                 </svg>
             </button>
             <button id="end-btn" onclick="clearChat()">
