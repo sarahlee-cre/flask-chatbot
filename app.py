@@ -83,8 +83,8 @@ def install():
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                border-bottom: 1px solid #ddd;
                 position: relative;
+                border-bottom: 1px solid #ddd;
             }
             .logo-title {
                 display: flex;
@@ -153,33 +153,23 @@ def install():
                 border-radius: 20px;
                 outline: none;
             }
-            .send-button {
-                margin-left: 0.5rem;
-                padding: 0.6rem 1rem;
-                border: none;
-                border-radius: 20px;
-                background-color: #0066cc;
-                color: white;
-                cursor: pointer;
-                background-image: url('/static/icons/send_icon.png');
-                background-repeat: no-repeat;
-                background-position: center;
-                background-size: 18px 18px;
-                width: 44px;
-            }
-            .end-button {
-                margin-left: 0.5rem;
-                padding: 0.6rem 1rem;
+            .icon-button {
+                width: 40px;
+                height: 40px;
                 border: none;
                 border-radius: 50%;
-                background-color: red;
-                color: white;
+                margin-left: 0.5rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
                 cursor: pointer;
-                background-image: url('/static/icons/stop_icon.png');
-                background-repeat: no-repeat;
-                background-position: center;
-                background-size: 18px 18px;
-                width: 44px;
+            }
+            .send-button {
+                background-color: #007bff;
+            }
+            .stop-button {
+                background-color: red;
+                border-radius: 4px;
             }
         </style>
     </head>
@@ -200,8 +190,12 @@ def install():
         </div>
         <div id="input-area">
             <input id="userInput" placeholder="질문을 입력하세요" />
-            <button class="send-button" onclick="sendToGPT()"></button>
-            <button class="end-button" onclick="clearChat()"></button>
+            <button class="icon-button send-button" onclick="sendToGPT()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M3 2v20l19-10L3 2z" fill="#00AEEF"/>
+                </svg>
+            </button>
+            <button class="icon-button stop-button" onclick="clearChat()"></button>
         </div>
     </body>
     </html>
