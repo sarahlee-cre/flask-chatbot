@@ -177,7 +177,7 @@ def install():
             <button class="search-btn" onclick="viewHistory()">🔍</button>
         </header>
         <div id="chat-box">
-            <div class="bubble bot"><img class='bot-icon' src='/static/icons/icon3.png'> 안녕하세요! 저는 한국외대 챗봇 후비입니다. 무엇을 도와드릴까요?😊
+            <div class="bubble bot"><img class='bot-icon' src='/static/icons/icon3.png'>안녕하세요! 저는 한국외대 챗봇 후비입니다. 무엇을 도와드릴까요?😊
  Hello! I'm HUBee, the HUFS chatbot. How can I help you today? 😊
  你好！我是韩国外国语大学聊天机器人HUBee。请问有什么可以帮您的吗？😊
  こんにちは！私は韓国外国語大学のチャットボットHUBeeです。ご用件をどうぞ😊
@@ -191,7 +191,12 @@ def install():
                     <path d="M3 2v20l19-10L3 2z" fill="#ffffff"/>
                 </svg>
             </button>
-            <button id="end-btn" onclick="clearChat()"></button>
+            <button id="end-btn" onclick="clearChat()">
+                <svg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 40 40'>
+                    <circle cx='20' cy='20' r='20' fill='#FF3B30'/>
+                    <rect x='12' y='12' width='16' height='16' fill='white'/>
+                </svg>
+            </button>
         </div>
     </body>
     </html>
