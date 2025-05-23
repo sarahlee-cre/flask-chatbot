@@ -166,6 +166,7 @@ def install():
                 background: #fff;
                 border-top: 1px solid #ccc;
                 gap: 0.5rem;
+                align-items: center;
             }
             #userInput {
                 flex: 1;
@@ -175,21 +176,34 @@ def install():
                 outline: none;
             }
             button {
-                width: 35px;
-                height: 35px;
                 padding: 0;
                 border: none;
                 border-radius: 50%;
                 background-color: transparent;
                 cursor: pointer;
             }
+            #toggleExamples {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 46px;
+                height: 46px;
+                font-size: 24px;
+                border-radius: 50%;
+                background-color: #e7f0ff;
+                border: 2px solid #a5cfff;
+            }
             #send-btn {
+                width: 35px;
+                height: 35px;
                 background-color: #007bff;
                 display: flex;
                 align-items: center;
                 justify-content: center;
             }
             #end-btn {
+                width: 35px;
+                height: 35px;
                 background-color: #ff0000;
                 display: flex;
                 align-items: center;
@@ -232,15 +246,13 @@ def install():
         </div>
         <div id="input-area">
             <div style="position: relative;">
-                <button id="toggleExamples" style="padding: 6px 10px; border-radius: 20px; background-color: #e7f0ff; border: 1px solid #a5cfff; cursor: pointer;">
-                    💬
-                </button>
-                <div id="exampleList" style="display: none; position: absolute; bottom: 45px; left: 0; background: white; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); z-index: 10; white-space: nowrap;">
-                    <button class="example-question">학교 주변 맛집 알고싶어</button><br />
-                    <button class="example-question">오늘 학식 뭐야?</button><br />
-                    <button class="example-question">기숙사 신청은 언제 해?</button><br />
-                    <button class="example-question">교환학생 가고싶어!</button><br />
-                    <button class="example-question">시험기간 언제야?</button>
+                <button id="toggleExamples">💬</button>
+                <div id="exampleList" style="display: none; position: absolute; bottom: 50px; left: 0; background: white; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); z-index: 10; white-space: nowrap;">
+                    <button class="example-question">학교 위치가 어디에요?</button><br />
+                    <button class="example-question">학식 가격이 얼마에요?</button><br />
+                    <button class="example-question">기숙사 신청은 언제 해요?</button><br />
+                    <button class="example-question">교환학생 조건이 뭐에요?</button><br />
+                    <button class="example-question">수강신청 도와줘요</button>
                 </div>
             </div>
             <input id="userInput" placeholder="질문을 입력하세요" />
@@ -252,7 +264,7 @@ def install():
             <button id="end-btn" onclick="clearChat()">
                 <svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 40 40'>
                     <circle cx='20' cy='20' r='20' fill='#FF3B30'/>
-                    <rect x='10' y='10' width='25' height='25' fill='white' rx='2'/>
+                    <rect x='12.5' y='12.5' width='15' height='15' fill='white' rx='2'/>
                 </svg>
             </button>
         </div>
