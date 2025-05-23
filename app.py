@@ -52,7 +52,7 @@ def install():
                 });
 
                 const data = await res.json();
-                const formatted = data.answer.replace(/\n/g, '<br>');
+                const formatted = data.answer.replace(/\\\\n/g, '<br>');
                 chatBox.innerHTML += "<div class='bubble bot'><img class='bot-icon' src='/static/icons/icon3.png'> " + formatted + "</div>";
                 chatBox.scrollTop = chatBox.scrollHeight;
                 history.push({ role: 'bot', content: data.answer });
@@ -226,7 +226,7 @@ def install():
         </style>
     </head>
     <body>
-            <header>
+        <header>
             <div class="info-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24">
                     <circle cx="12" cy="12" r="12" fill="#444444" />
