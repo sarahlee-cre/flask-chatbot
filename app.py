@@ -84,6 +84,7 @@ def install():
                 justify-content: center;
                 border-bottom: 1px solid #ddd;
                 gap: 0.5rem;
+                position: relative;
             }
             .logo {
                 height: 40px;
@@ -99,6 +100,12 @@ def install():
                 font-size: 1.2rem;
                 position: absolute;
                 right: 2rem;
+            }
+            .info-icon {
+                position: absolute;
+                left: 1rem;
+                top: 50%;
+                transform: translateY(-50%);
             }
             #chat-box {
                 flex: 1;
@@ -140,7 +147,7 @@ def install():
                 padding: 0.75rem;
                 background: #fff;
                 border-top: 1px solid #ccc;
-                gap: 0.75rem;
+                gap: 0.5rem;
             }
             #userInput {
                 flex: 1;
@@ -174,6 +181,12 @@ def install():
     </head>
     <body>
         <header>
+            <div class="info-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="12" fill="#444444" />
+                    <text x="12" y="18" text-anchor="middle" font-size="18" fill="white" font-family="Arial, sans-serif" font-weight="bold">i</text>
+                </svg>
+            </div>
             <img src="/static/icons/hufs.png" class="logo" alt="로고" />
             <div class="title">HUFS 비서, HUBEE</div>
             <button class="search-btn" onclick="viewHistory()">🔍</button>
@@ -196,7 +209,7 @@ def install():
             <button id="end-btn" onclick="clearChat()">
                 <svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 40 40'>
                     <circle cx='20' cy='20' r='20' fill='#FF3B30'/>
-                    <rect x='8' y='8' width='24' height='24' fill='white' rx='2'/>
+                    <rect x='10' y='10' width='25' height='25' fill='white' rx='2'/>
                 </svg>
             </button>
         </div>
