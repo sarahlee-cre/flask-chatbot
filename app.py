@@ -52,7 +52,7 @@ def install():
                 });
 
                 const data = await res.json();
-                const formatted = data.answer.replace(/\\\\n/g, '<br>');
+                const formatted = data.answer.replace(/\\n/g, '<br>');
                 chatBox.innerHTML += "<div class='bubble bot'><img class='bot-icon' src='/static/icons/icon3.png'> " + formatted + "</div>";
                 chatBox.scrollTop = chatBox.scrollHeight;
                 history.push({ role: 'bot', content: data.answer });
@@ -64,7 +64,7 @@ def install():
             }
 
             function viewHistory() {
-                alert(history.map(h => `${h.role === 'user' ? '🙋‍♀️' : '🤖'} ${h.content}`).join('\\n\\n'));
+                alert(history.map(h => `${h.role === 'user' ? '🙋‍♀️' : '🤖'} ${h.content}`).join('\n\n'));
             }
 
             document.addEventListener("DOMContentLoaded", function () {
@@ -197,19 +197,18 @@ def install():
             #send-btn {
                 width: 35px;
                 height: 35px;
-                background-color: #b3e5fc; /* 파스텔 하늘색 */
+                background-color: #81d4fa;
                 display: flex;
                 align-items: center;
                 justify-content: center;
             }
-
             #end-btn {
-            width: 35px;
-            height: 35px;
-            background-color: #ffcdd2; /* 파스텔 핑크/살구 */
-            display: flex;
-            align-items: center;
-            justify-content: center;
+                width: 35px;
+                height: 35px;
+                background-color: #f48fb1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
             .example-question {
                 display: block;
@@ -239,12 +238,7 @@ def install():
             <button class="search-btn" onclick="viewHistory()">🔍</button>
         </header>
         <div id="chat-box">
-            <div class="bubble bot"><img class='bot-icon' src='/static/icons/icon3.png'> 안녕하세요! 저는 한국외대 챗봇 후비입니다. 무엇을 도와드릴까요?😊
- Hello! I'm HUBee, the HUFS chatbot. How can I help you today? 😊
- 你好！我是韩国外国语大学聊天机器人HUBee。请问有什么可以帮您的吗？😊
- こんにちは！私は韓国外国語大学のチャットボットHUBeeです。ご用件をどうぞ😊
- Xin chào! Tôi là HUBee, chatbot của Đại học Ngoại ngữ Hàn Quốc. Tôi có thể giúp gì cho bạn? 😊
-</div>
+            <div class="bubble bot"><img class='bot-icon' src='/static/icons/icon3.png'> 안녕하세요! 저는 한국외대 챗봇 후비입니다. 무엇을 도와드릴까요? 😊<br>Hello! I'm HUBee, the HUFS chatbot. How can I help you today? 😊<br>你好！我是韩国外国语大学聊天机器人HUBee。请问有什么可以帮您的吗？😊<br>こんにちは！私は韓国外国語大学のチャットボットHUBeeです。ご用件をどうぞ😊<br>Xin chào! Tôi là HUBee, chatbot của Đại học Ngoại ngữ Hàn Quốc. Tôi có thể giúp gì cho bạn? 😊</div>
         </div>
         <div id="input-area">
             <div style="position: relative;">
