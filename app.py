@@ -264,7 +264,7 @@ def install():
             </button>
             <button id="end-btn" onclick="clearChat()">
                 <svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 40 40'>
-                    <circle cx='20' cy='20' r='20' fill='#FF3B30'/>
+                    <circle cx='20' cy='20' r='20' fill='#f48fb1'/>
                     <rect x='7' y='10' width='28' height='28' fill='white' rx='2'/>
                 </svg>
             </button>
