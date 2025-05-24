@@ -52,7 +52,7 @@ def install():
                 });
 
                 const data = await res.json();
-                const formatted = data.answer.replace(/\\n/g, '<br>');
+                const formatted = data.answer.replace(/\\\\n/g, '<br>');
                 chatBox.innerHTML += "<div class='bubble bot'><img class='bot-icon' src='/static/icons/icon3.png'> " + formatted + "</div>";
                 chatBox.scrollTop = chatBox.scrollHeight;
                 history.push({ role: 'bot', content: data.answer });
@@ -64,7 +64,7 @@ def install():
             }
 
             function viewHistory() {
-                alert(history.map(h => `${h.role === 'user' ? '🙋‍♀️' : '🤖'} ${h.content}`).join('\n\n'));
+                alert(history.map(h => ${h.role === 'user' ? '🙋‍♀️' : '🤖'} ${h.content}).join('\\n\\n'));
             }
 
             document.addEventListener("DOMContentLoaded", function () {
@@ -242,7 +242,8 @@ def install():
  Hello! I'm HUBee, the HUFS chatbot. How can I help you today? 😊
  你好！我是韩国外国语大学聊天机器人HUBee。请问有什么可以帮您的吗？😊
  こんにちは！私は韓国外国語大学のチャットボットHUBeeです。ご用件をどうぞ😊
- Xin chào! Tôi là HUBee, chatbot của Đại học Ngoại ngữ Hàn Quốc. Tôi có thể giúp gì cho bạn? 😊</div>
+ Xin chào! Tôi là HUBee, chatbot của Đại học Ngoại ngữ Hàn Quốc. Tôi có thể giúp gì cho bạn? 😊
+</div>
         </div>
         <div id="input-area">
             <div style="position: relative;">
@@ -263,8 +264,8 @@ def install():
             </button>
             <button id="end-btn" onclick="clearChat()">
                 <svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 40 40'>
-                    <circle cx='20' cy='20' r='20' fill='#f48fb1'/>
-                    <rect x='7' y='10' width='25' height='25' fill='white' rx='2'/>
+                    <circle cx='20' cy='20' r='20' fill='#FF3B30'/>
+                    <rect x='7' y='10' width='28' height='28' fill='white' rx='2'/>
                 </svg>
             </button>
         </div>
