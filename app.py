@@ -197,18 +197,19 @@ def install():
             #send-btn {
                 width: 35px;
                 height: 35px;
-                background-color: #007bff;
+                background-color: #b3e5fc; /* 파스텔 하늘색 */
                 display: flex;
                 align-items: center;
                 justify-content: center;
             }
+
             #end-btn {
-                width: 35px;
-                height: 35px;
-                background-color: #ff0000;
-                display: flex;
-                align-items: center;
-                justify-content: center;
+            width: 35px;
+            height: 35px;
+            background-color: #ffcdd2; /* 파스텔 핑크/살구 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
             }
             .example-question {
                 display: block;
