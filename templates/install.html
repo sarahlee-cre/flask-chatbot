@@ -269,27 +269,9 @@
 
       const data = await res.json();
       const formatted = data.answer
-        // 1. 링크는 (or 링크입니다) 다음 줄에 URL 있는 경우 한 줄로
-        .replace(/(링크(?:는|는요|입니다)?)\s*\n\s*(https?:\/\/[^\s\)\]\}]+)/g,
-          '$1 <a href="$2" target="_blank" style="color:#1a0dab;">$2</a>')
-
-        // 2. "- 링크:" 스타일 처리
-        .replace(/- 링크:\s*\n\s*(https?:\/\/[^\s\)\]\}]+)/g,
-          '- 링크: <a href="$1" target="_blank" style="color:#1a0dab;">$1</a>')
-
-        // 3. 마크다운 링크
-        .replace(/\[([^\]]+)\]\((https?:\/\/[^\s\)\]\}]+)\)/g,
-          '<a href="$2" target="_blank" style="color:#1a0dab;">$1</a>')
-
-        // 4. 일반 URL
-        .replace(/(?<!["'>])(https?:\/\/[^\s\)\]\}]+)/g,
+        .replace(/(https?:\/\/[^\s\)\]\}]+)/g,
           '<a href="$1" target="_blank" style="color:#1a0dab;">$1</a>')
-
-        // 5. 줄바꿈
-        .replace(/\n{2,}/g, '<br><br>')
         .replace(/\n/g, '<br>');
-
-
 
       chatBox.innerHTML += `<div class='bubble bot'><img class='bot-icon' src='/static/icons/icon3.png'> ${formatted}</div>`;
       chatBox.scrollTop = chatBox.scrollHeight;
