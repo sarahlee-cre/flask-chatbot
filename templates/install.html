@@ -269,10 +269,19 @@
 
       const data = await res.json();
       const formatted = data.answer
-        .replace(/\[([^\]]+)\]\((https?:\/\/[^\s\)\]\}]+)\)/g, '<a href="$2" target="_blank" style="color:#1a0dab;">$1</a>')
-        // ✅ 다음: 이미 <a> 태그가 포함되지 않은 순수 URL만 감싸기
-        .replace(/(?<!["'>])(https?:\/\/[^\s\)\]\}]+)/g, '<a href="$1" target="_blank" style="color:#1a0dab;">$1</a>')
-        // ✅ 마지막 줄바꿈
+        // 1. '- 링크: https://...' 패턴을 가장 먼저 감싸기
+        .replace(/- 링크:\s*(https?:\/\/[^\s\)\]\}]+)/g,
+          '- 링크: <a href="$1" target="_blank" style="color:#1a0dab;">$1</a>')
+
+        // 2. 마크다운 링크
+        .replace(/\[([^\]]+)\]\((https?:\/\/[^\s\)\]\}]+)\)/g,
+          '<a href="$2" target="_blank" style="color:#1a0dab;">$1</a>')
+
+        // 3. 일반 URL 자동 감싸기 (태그 내부 제외)
+        .replace(/(?<!["'>])(https?:\/\/[^\s\)\]\}]+)/g,
+          '<a href="$1" target="_blank" style="color:#1a0dab;">$1</a>')
+
+        // 4. 줄바꿈 정리
         .replace(/\n{2,}/g, '<br><br>')
         .replace(/\n/g, '<br>');
 
