@@ -269,6 +269,7 @@
 
       const data = await res.json();
       const formatted = data.answer
+        .replace(/【\d+:\d+†source】/g, '') // ← 출처 제거
         .replace(/(https?:\/\/[^\s\)\]\}]+)/g,
           '<a href="$1" target="_blank" style="color:#1a0dab;">$1</a>')
         .replace(/\n/g, '<br>');
@@ -313,6 +314,7 @@
         list.style.display = list.style.display === "none" ? "block" : "none";
       });
 
+      // 예시 질문 버튼 클릭 → 질문 입력 + 전송
       document.querySelectorAll(".example-question").forEach(btn => {
         btn.addEventListener("click", () => {
           const text = btn.innerText;
@@ -321,7 +323,16 @@
           sendToGPT();
         });
       });
+
+      // ✅ Enter 키 입력은 딱 한 번만 등록!
+      document.getElementById("userInput").addEventListener("keydown", function (e) {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault(); // 줄바꿈 방지
+          sendToGPT();
+        }
+      });
     });
+
   </script>
 </body>
 </html>
