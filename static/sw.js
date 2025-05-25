@@ -1,4 +1,4 @@
-const CACHE_NAME = "hubi-cache-v4";
+const CACHE_NAME = "hubi-cache-v5";
 const STATIC_ASSETS = [
   "/install",
   "/static/manifest.json",
