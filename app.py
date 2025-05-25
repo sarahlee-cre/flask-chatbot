@@ -10,15 +10,13 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 ASSISTANT_ID = os.getenv("ASSISTANT_ID")
 
 app = Flask(__name__, static_folder="static")
-app.secret_key = os.getenv("FLASK_SECRET_KEY", "hubi-temp-secret")  # 세션 유지용 시크릿 키
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "hubi-temp-secret")
 
-# /install 경로에서 install.html을 렌더링
 @app.route("/install")
 def install():
     session.clear()
     return render_template("install.html")
 
-# 사용자 메시지를 OpenAI Assistant API로 전달
 @app.route("/ask", methods=["POST"])
 def ask():
     try:
@@ -30,44 +28,47 @@ def ask():
             session["thread_id"] = thread.id
         thread_id = session["thread_id"]
 
-        # 메시지 보내기
+        # 사용자 메시지 추가
         openai.beta.threads.messages.create(
             thread_id=thread_id,
             role="user",
             content=message
         )
 
-        # Assistant 실행
+        # GPT Assistant 실행
         run = openai.beta.threads.runs.create(
             thread_id=thread_id,
             assistant_id=ASSISTANT_ID
         )
 
-        # 최대 30초 동안 기다리며 응답 확인
+        # 완료까지 최대 30초 대기
         for _ in range(30):
             status = openai.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
             if status.status == "completed":
                 break
             time.sleep(1)
 
-        # 응답 메시지 가져오기
+        # 마지막 assistant 응답 찾기
         messages = openai.beta.threads.messages.list(thread_id=thread_id)
-        answer = ""
+        answer = None
+
         for msg in reversed(messages.data):
             if msg.role == "assistant":
                 for part in msg.content:
-                    if part.type == "text":
+                    if part.type == "text" and part.text.value.strip():
                         answer = part.text.value.strip()
                         break
                 if answer:
                     break
+
+        if not answer:
+            answer = "죄송합니다. 응답을 생성하지 못했어요."
 
         return jsonify({"answer": answer})
 
     except Exception as e:
         return jsonify({"answer": f"오류 발생: {str(e)}"})
 
-# 정적 파일 서비스 (/static/)
 @app.route("/static/<path:filename>")
 def static_files(filename):
     return send_from_directory("static", filename)
