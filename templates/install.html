@@ -225,6 +225,31 @@
           document.getElementById("userInput").value = text;
           list.style.display = "none";
           sendToGPT();
+    let deferredPrompt = null;
+
+          let deferredPrompt = null;
+        });
+      });
+    });
+  </script>
+
+  <script>
+      let deferredPrompt = null;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        const installBtn = document.getElementById("installBtn");
+        installBtn.style.display = "block";
+        installBtn.addEventListener("click", () => {
+          installBtn.style.display = "none";
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === "accepted") {
+              console.log("✅ 사용자 설치 승인");
+            } else {
+            console.log("❌ 사용자 설치 거절");
+            }
+            deferredPrompt = null;
         });
       });
     });
@@ -298,4 +323,5 @@
     </button>
   </div>
 </body>
+  <button id="installBtn">📲 HUBEE 앱 설치하기</button>
 </html>
