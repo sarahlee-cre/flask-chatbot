@@ -22,42 +22,50 @@ def ask():
     try:
         message = request.json.get("message", "")
 
+        # 처음 접속 시 Thread 생성
         if "thread_id" not in session:
             thread = openai.beta.threads.create()
             session["thread_id"] = thread.id
         thread_id = session["thread_id"]
 
+        # 사용자 메시지 전송
         openai.beta.threads.messages.create(
             thread_id=thread_id,
             role="user",
             content=message
         )
 
+        # Assistant 실행
         run = openai.beta.threads.runs.create(
             thread_id=thread_id,
             assistant_id=ASSISTANT_ID
         )
 
+        # 응답 대기 (최대 30초)
         for _ in range(30):
             status = openai.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
             if status.status == "completed":
                 break
             time.sleep(1)
 
+        # 메시지 리스트 받아오기
         messages = openai.beta.threads.messages.list(thread_id=thread_id)
         print("--- 전체 메시지 로그 ---")
         for msg in messages.data:
             print(f"{msg.role}:", msg.content)
 
+        # 최신 assistant 메시지 중 가장 최근 응답 추출
+        assistant_messages = [msg for msg in messages.data if msg.role == "assistant"]
+        assistant_messages.sort(key=lambda x: x.created_at, reverse=True)
+
         answer = None
-        for msg in reversed(messages.data):
-            if msg.role == "assistant":
-                for part in msg.content:
-                    if part.type == "text" and part.text.value.strip():
-                        answer = part.text.value.strip()
-                        break
-                if answer:
+        for msg in assistant_messages:
+            for part in msg.content:
+                if part.type == "text" and part.text.value.strip():
+                    answer = part.text.value.strip()
                     break
+            if answer:
+                break
 
         if not answer:
             answer = "죄송합니다. 아직 적절한 답변을 찾지 못했어요. 다시 질문해 주세요."
