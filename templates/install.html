@@ -147,113 +147,6 @@
       background-color: #eef6ff;
     }
   </style>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/static/sw.js');
-      });
-    }
-
-    let history = [];
-    let allConversations = [];
-
-    async function sendToGPT() {
-      const inputEl = document.getElementById("userInput");
-      const userInput = inputEl.value.trim();
-      if (!userInput) return;
-
-      const chatBox = document.getElementById("chat-box");
-      chatBox.innerHTML += `<div class='bubble user'>🙋‍♀️ ${userInput}</div>`;
-      inputEl.value = "";
-      chatBox.scrollTop = chatBox.scrollHeight;
-      history.push({ role: 'user', content: userInput });
-
-      const res = await fetch("/ask", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userInput })
-      });
-
-      const data = await res.json();
-      const formatted = data.answer
-        .replace(/\n/g, '<br>')
-        .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color: #1a0dab;">$1</a>');
-
-      chatBox.innerHTML += `<div class='bubble bot'><img class='bot-icon' src='/static/icons/icon3.png'> ${formatted}</div>`;
-      chatBox.scrollTop = chatBox.scrollHeight;
-      history.push({ role: 'bot', content: data.answer });
-    }
-
-    function clearChat() {
-      if (history.length > 0) {
-        allConversations.push([...history]);
-        history = [];
-      }
-      document.getElementById("chat-box").innerHTML = "";
-    }
-
-    function viewHistory() {
-      if (allConversations.length === 0) {
-        alert("이전 대화 기록이 없습니다.");
-        return;
-      }
-      let output = allConversations.map((conv, idx) => {
-        return `📂 대화 ${idx + 1}\n` + conv.map(h => `${h.role === 'user' ? '🙋‍♀️' : '🤖'} ${h.content}`).join('\n');
-      }).join('\n\n----------------------\n\n');
-      alert(output);
-    }
-
-    function openModal() {
-      document.getElementById("infoModal").style.display = "block";
-    }
-
-    function closeModal() {
-      document.getElementById("infoModal").style.display = "none";
-    }
-
-    document.addEventListener("DOMContentLoaded", function () {
-      const toggleBtn = document.getElementById("toggleExamples");
-      const list = document.getElementById("exampleList");
-
-      toggleBtn.addEventListener("click", () => {
-        list.style.display = list.style.display === "none" ? "block" : "none";
-      });
-
-      document.querySelectorAll(".example-question").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const text = btn.innerText;
-          document.getElementById("userInput").value = text;
-          list.style.display = "none";
-          sendToGPT();
-    let deferredPrompt = null;
-
-          let deferredPrompt = null;
-        });
-      });
-    });
-  </script>
-
-  <script>
-      let deferredPrompt = null;
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        const installBtn = document.getElementById("installBtn");
-        installBtn.style.display = "block";
-        installBtn.addEventListener("click", () => {
-          installBtn.style.display = "none";
-          deferredPrompt.prompt();
-          deferredPrompt.userChoice.then((choiceResult) => {
-            if (choiceResult.outcome === "accepted") {
-              console.log("✅ 사용자 설치 승인");
-            } else {
-            console.log("❌ 사용자 설치 거절");
-            }
-            deferredPrompt = null;
-        });
-      });
-    });
-  </script>
 </head>
 <body>
   <header>
@@ -268,36 +161,24 @@
     <button class="search-btn" onclick="viewHistory()">🔍</button>
   </header>
 
-  <!-- 안내 모달 -->
   <div id="infoModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:white; z-index:1000;">
     <div style="background:white; max-width:500px; margin:10vh auto; padding:20px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.3); position:relative; max-height:80vh; overflow-y:auto;">
       <h3>📘 HUFS 비서, HUBEE 사용 방법</h3>
-      <p>안녕하세요! 한국외대 챗봇 HUBEE입니다.<br>저는 학교 공지사항이나 학사일정등 다양한 자료룔 가지고 있어요!</p>
-      <p>후비에게 아래와 같은 질문을 해보세요:</p>
+      <p>안녕하세요! 한국외대 챗봇 HUBEE입니다.<br>저는 학교 공지사항이나 학사일정등 다양한 자료를 가지고 있어요!</p>
       <ul>
         <li>📅 최근 학사 공지가 뭐예요?</li>
-        <li> 🍽 오늘 학식 메뉴는?</li>
+        <li>🍽 오늘 학식 메뉴는?</li>
         <li>🏠 기숙사 입실은 언제예요?</li>
         <li>🌍 교환학생 조건이 궁금해요</li>
       </ul>
-      <p>아래 파란색 버튼을 누르면 질문이 전송됩니다. <br> 옆의 빨간버튼을 누르면 채팅이 종료되고 새로운 채팅을 시작하실 수 있습니다!<br> 상단 🔍 버튼을 눌러 이전 대화 내용도 확인할 수 있어요!</p>
-      <h3>📘 HUFS Secretary, how to use HUBEE</h3>
-      <p>Hello! I'm HUBEE, a chatbot of Hankuk University of Foreign Studies.<br>I have various materials such as school announcements and academic schedules!</p>
-      <p>Ask the HUBEE the following questions:</p>
-      <ul>
-        <li>📅 What is the recent academic notice?</li>
-        <li> 🍽 What's on the menu today?</li>
-        <li>🏠 When do you enter the dorm?</li>
-        <li>🌍 I want to know the conditions of exchange students</li>
-      </ul>
-      <p> Press the blue button below to send you a question. <br> Press the red button to end the chat and start a new one! <br> Press the 🔍 button at the top to check out the previous conversation as well!</p>
       <button onclick="closeModal()" style="margin-top: 10px; padding: 6px 14px; background: #003b6f; color: white; border: none; border-radius: 6px;">닫기</button>
     </div>
   </div>
 
   <div id="chat-box">
-    <div class="bubble bot"><img class='bot-icon' src='/static/icons/icon3.png'>안녕하세요! 저는 한국외대 챗봇 후비입니다. 무엇을 도와드릴까요?😊<br>Hello! I'm HUBee, the HUFS chatbot. How can I help you today? 😊<br>你好！我是韩国外国语大学聊天机器人HUBee。请问有什么可以帮您的吗？😊<br>こんにちは！私は韓国外国語大学のチャットボットHUBeeです。ご用件をどうぞ😊<br>Xin chào! Tôi là HUBee, chatbot của Đại học Ngoại ngữ Hàn Quốc. Tôi có thể giúp gì cho bạn? 😊</div>
+    <div class="bubble bot"><img class='bot-icon' src='/static/icons/icon3.png'>안녕하세요! 저는 한국외대 챗봇 후비입니다. 무엇을 도와드릴까요?😊</div>
   </div>
+
   <div id="input-area">
     <div style="position: relative;">
       <button id="toggleExamples">💬</button>
@@ -322,6 +203,111 @@
       </svg>
     </button>
   </div>
+
+  <button id="installBtn" style="display: none;">📲 HUBEE 앱 설치하기</button>
+
+  <!-- JavaScript는 여기! -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/static/sw.js');
+      });
+    }
+
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const installBtn = document.getElementById("installBtn");
+      installBtn.style.display = "block";
+      installBtn.addEventListener("click", () => {
+        installBtn.style.display = "none";
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === "accepted") {
+            console.log("✅ 사용자 설치 승인");
+          } else {
+            console.log("❌ 사용자 설치 거절");
+          }
+          deferredPrompt = null;
+        });
+      });
+    });
+
+    let history = [];
+    let allConversations = [];
+
+    window.sendToGPT = async function () {
+      const inputEl = document.getElementById("userInput");
+      const userInput = inputEl.value.trim();
+      if (!userInput) return;
+
+      const chatBox = document.getElementById("chat-box");
+      chatBox.innerHTML += `<div class='bubble user'>🙋‍♀️ ${userInput}</div>`;
+      inputEl.value = "";
+      chatBox.scrollTop = chatBox.scrollHeight;
+      history.push({ role: 'user', content: userInput });
+
+      const res = await fetch("/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userInput })
+      });
+
+      const data = await res.json();
+      const formatted = data.answer
+        .replace(/\n/g, '<br>')
+        .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color: #1a0dab;">$1</a>');
+
+      chatBox.innerHTML += `<div class='bubble bot'><img class='bot-icon' src='/static/icons/icon3.png'> ${formatted}</div>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
+      history.push({ role: 'bot', content: data.answer });
+    };
+
+    window.clearChat = function () {
+      if (history.length > 0) {
+        allConversations.push([...history]);
+        history = [];
+      }
+      document.getElementById("chat-box").innerHTML = "";
+    };
+
+    window.viewHistory = function () {
+      if (allConversations.length === 0) {
+        alert("이전 대화 기록이 없습니다.");
+        return;
+      }
+      let output = allConversations.map((conv, idx) => {
+        return `📂 대화 ${idx + 1}\n` + conv.map(h => `${h.role === 'user' ? '🙋‍♀️' : '🤖'} ${h.content}`).join('\n');
+      }).join('\n\n----------------------\n\n');
+      alert(output);
+    };
+
+    window.openModal = function () {
+      document.getElementById("infoModal").style.display = "block";
+    };
+
+    window.closeModal = function () {
+      document.getElementById("infoModal").style.display = "none";
+    };
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const toggleBtn = document.getElementById("toggleExamples");
+      const list = document.getElementById("exampleList");
+
+      toggleBtn.addEventListener("click", () => {
+        list.style.display = list.style.display === "none" ? "block" : "none";
+      });
+
+      document.querySelectorAll(".example-question").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const text = btn.innerText;
+          document.getElementById("userInput").value = text;
+          list.style.display = "none";
+          sendToGPT();
+        });
+      });
+    });
+  </script>
 </body>
-  <button id="installBtn">📲 HUBEE 앱 설치하기</button>
 </html>
