@@ -268,9 +268,9 @@
       });
 
       const data = await res.json();
-      const formatted = data.answer
-        .replace(/【\d+:\d+†source】/g, '') // ← 출처 제거
-        .replace(/(https?:\/\/[^\s\)\]\}]+)/g,
+      const formatted = data.answer 
+        .replace(/【\d+:\d+†[^】]+】/g, '') // 모든 출처 제거
+        .replace(/(https?:\/\/[^\s\)\]\}]+)/g, 
           '<a href="$1" target="_blank" style="color:#1a0dab;">$1</a>')
         .replace(/\n/g, '<br>');
 
