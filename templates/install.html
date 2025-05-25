@@ -146,6 +146,16 @@
     .example-question:hover {
       background-color: #eef6ff;
     }
+    #historyList {
+      margin-top: 1rem;
+      background: #fff9e9;
+      border: 1px solid #ffcc80;
+      border-radius: 10px;
+      padding: 1rem;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      display: none;
+    }
   </style>
   <script>
     if ('serviceWorker' in navigator) {
@@ -184,6 +194,10 @@
     }
 
     function clearChat() {
+      const historyDiv = document.getElementById("historyList");
+      historyDiv.innerHTML = "<b>📜 이전 대화 내역:</b><br><br>" +
+        history.map(h => `${h.role === 'user' ? '🙋‍♀️' : '🤖'} ${h.content}`).join('<br><br>');
+      historyDiv.style.display = "block";
       document.getElementById("chat-box").innerHTML = "";
       history = [];
     }
@@ -259,17 +273,19 @@
   </div>
 
   <div id="chat-box">
-    <div class="bubble bot"><img class='bot-icon' src='/static/icons/icon3.png'>안녕하세요! 저는 한국외대 챗봇 후비입니다. 무엇을 도와드릴까요?😊<br>Hello! I'm HUBee, the HUFS chatbot. How can I help you today? 😊<br>你好！我是韩国外国语大学聊天机器人HUBee。请问有什么可以帮您的吗？😊<br>こんにちは！私は韓国外国語大学のチャットボットHUBeeです。ご用件をどうぞ😊<br>Xin chào! Tôi là HUBee, chatbot của Đại học Ngoại ngữ Hàn Quốc. Tôi có thể giúp gì cho bạn? 😊</div>
+    <div class="bubble bot"><img class='bot-icon' src='/static/icons/icon3.png'>안녕하세요! 무엇을 도와드릴까요? 😊</div>
   </div>
+
+  <div id="historyList"></div>
+
   <div id="input-area">
     <div style="position: relative;">
       <button id="toggleExamples">💬</button>
       <div id="exampleList" style="display: none; position: absolute; bottom: 50px; left: 0; background: white; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); z-index: 10; white-space: nowrap;">
-        <button class="example-question">최근 학사공지 알고싶어요!</button><br />
-        <button class="example-question">오늘 학식은 뭐예요?</button><br />
-        <button class="example-question">기숙사 신청은 언제 해요?</button><br />
-        <button class="example-question">교환학생 가고 싶어요!</button><br />
-        <button class="example-question">시험이 언제예요?</button>
+        <button class="example-question">최근 학사공지 알려줘</button><br />
+        <button class="example-question">오늘 학식은 뭐야?</button><br />
+        <button class="example-question">기숙사 신청 언제야?</button><br />
+        <button class="example-question">교환학생 정보 알려줘</button>
       </div>
     </div>
     <input id="userInput" placeholder="질문을 입력하세요" />
@@ -287,3 +303,4 @@
   </div>
 </body>
 </html>
+
