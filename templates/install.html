@@ -270,7 +270,9 @@
       const data = await res.json();
       const formatted = data.answer
         .replace(/\[([^\]]+)\]\((https?:\/\/[^\s\)\]\}]+)\)/g, '<a href="$2" target="_blank" style="color:#1a0dab;">$1</a>')
-        .replace(/(https?:\/\/[^\s\)\]\}]+)/g, '<a href="$1" target="_blank" style="color:#1a0dab;">$1</a>')
+        // ✅ 다음: 이미 <a> 태그가 포함되지 않은 순수 URL만 감싸기
+        .replace(/(?<!["'>])(https?:\/\/[^\s\)\]\}]+)/g, '<a href="$1" target="_blank" style="color:#1a0dab;">$1</a>')
+        // ✅ 마지막 줄바꿈
         .replace(/\n{2,}/g, '<br><br>')
         .replace(/\n/g, '<br>');
 
