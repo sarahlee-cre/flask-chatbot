@@ -73,7 +73,9 @@ def ask():
         return jsonify({"answer": answer})
 
     except Exception as e:
-        return jsonify({"answer": f"오류 발생: {str(e)}"})
+        import traceback
+        traceback.print_exc()  # 콘솔(로그)에 자세한 에러 출력
+        return jsonify({"answer": f"오류 발생: {str(e)}"}), 500
 
 @app.route("/static/<path:filename>")
 def static_files(filename):
