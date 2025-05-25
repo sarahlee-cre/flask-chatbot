@@ -1,4 +1,4 @@
-const CACHE_NAME = "hubi-cache-v3";
+const CACHE_NAME = "hubi-cache-v4";
 const STATIC_ASSETS = [
   "/install",
   "/static/manifest.json",
@@ -9,6 +9,7 @@ const STATIC_ASSETS = [
 ];
 
 self.addEventListener("install", (event) => {
+  console.log("📦 Installing service worker and caching static assets...");
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
   );
@@ -16,6 +17,7 @@ self.addEventListener("install", (event) => {
 });
 
 self.addEventListener("activate", (event) => {
+  console.log("✅ Activating new service worker and clearing old caches...");
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
