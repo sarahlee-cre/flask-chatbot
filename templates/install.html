@@ -60,9 +60,10 @@
     .bubble {
       padding: 0.75rem 1rem;
       border-radius: 20px;
-      max-width: 75%;
+      max-width: 100%; /* ✅ 기존: 75% → 넓혀서 텍스트가 더 자연스럽게 보이게 함 */
       word-wrap: break-word;
-      white-space: pre-wrap;
+      overflow-wrap: anywhere; /* ✅ 긴 단어/링크 줄바꿈 허용 */
+      white-space: normal; /* ✅ 기존: pre-wrap → 자동 줄바꿈 */
       font-size: 0.95rem;
       line-height: 1.5;
     }
@@ -77,6 +78,7 @@
       border: 1px solid #ddd;
       color: #333;
       display: flex;
+      flex-wrap: wrap; /* ✅ 긴 문장도 잘 감싸지도록 설정 */
       align-items: center;
       gap: 0.5rem;
     }
