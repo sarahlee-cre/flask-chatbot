@@ -22,36 +22,34 @@ def ask():
     try:
         message = request.json.get("message", "")
 
-        # Thread가 없으면 새로 생성
         if "thread_id" not in session:
             thread = openai.beta.threads.create()
             session["thread_id"] = thread.id
         thread_id = session["thread_id"]
 
-        # 사용자 메시지 추가
         openai.beta.threads.messages.create(
             thread_id=thread_id,
             role="user",
             content=message
         )
 
-        # GPT Assistant 실행
         run = openai.beta.threads.runs.create(
             thread_id=thread_id,
             assistant_id=ASSISTANT_ID
         )
 
-        # 완료까지 최대 30초 대기
         for _ in range(30):
             status = openai.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
             if status.status == "completed":
                 break
             time.sleep(1)
 
-        # 마지막 assistant 응답 찾기
         messages = openai.beta.threads.messages.list(thread_id=thread_id)
-        answer = None
+        print("--- 전체 메시지 로그 ---")
+        for msg in messages.data:
+            print(f"{msg.role}:", msg.content)
 
+        answer = None
         for msg in reversed(messages.data):
             if msg.role == "assistant":
                 for part in msg.content:
@@ -62,7 +60,7 @@ def ask():
                     break
 
         if not answer:
-            answer = "죄송합니다. 응답을 생성하지 못했어요."
+            answer = "죄송합니다. 아직 적절한 답변을 찾지 못했어요. 다시 질문해 주세요."
 
         return jsonify({"answer": answer})
 
@@ -74,4 +72,4 @@ def static_files(filename):
     return send_from_directory("static", filename)
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
