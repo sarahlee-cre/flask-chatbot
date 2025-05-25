@@ -80,4 +80,5 @@ def static_files(filename):
     return send_from_directory("static", filename)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))  # Render에서 주는 포트 사용
+    app.run(host="0.0.0.0", port=port)
