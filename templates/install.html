@@ -152,6 +152,11 @@
 </head>
 <body>
   <header>
+    <div id="installBanner" style="display: none; position: fixed; top: 0; left: 0; width: 100%; background: #eaf6ff; text-align: center; padding: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 9999;">
+      <span>후비를 설치하고 더 편하게 이용해보세요! 🎄</span>
+      <button id="installBtn" style="margin-left: 10px; padding: 0.5rem 1rem; background-color: #0099ff; color: white; border: none; border-radius: 8px;">설치하기</button>
+    </div>
+
     <div class="info-icon" onclick="openModal()">
       <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24">
         <circle cx="12" cy="12" r="12" fill="#444444" />
@@ -217,7 +222,6 @@
     </button>
   </div>
 
-  <button id="installBtn" style="display: none;">📲 HUBEE 앱 설치하기</button>
 
   <!-- JavaScript는 여기! -->
   <script>
@@ -227,25 +231,6 @@
       });
     }
 
-    let deferredPrompt = null;
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      const installBtn = document.getElementById("installBtn");
-      installBtn.style.display = "block";
-      installBtn.addEventListener("click", () => {
-        installBtn.style.display = "none";
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === "accepted") {
-            console.log("✅ 사용자 설치 승인");
-          } else {
-            console.log("❌ 사용자 설치 거절");
-          }
-          deferredPrompt = null;
-        });
-      });
-    });
 
     let history = [];
     let allConversations = [];
@@ -334,42 +319,45 @@
     });
 
   </script>
-  <script>
+
+<!-- ✅ 설치 관련 JS -->
+<script>
   let deferredPrompt = null;
 
   window.addEventListener("beforeinstallprompt", (e) => {
     e.preventDefault();
     deferredPrompt = e;
 
+    // 이미 본 사용자라면 배너 안 띄움
+    if (localStorage.getItem("hubeeInstallPromptShown")) return;
+
     const banner = document.getElementById("installBanner");
     if (banner) banner.style.display = "block";
 
-    document.getElementById("installBtn").addEventListener("click", async () => {
-      banner.style.display = "none";
-      deferredPrompt.prompt();
-      const result = await deferredPrompt.userChoice;
-      console.log("설치 응답:", result.outcome);
-      deferredPrompt = null;
-    });
+    const installBtn = document.getElementById("installBtn");
+    if (installBtn) {
+      installBtn.addEventListener("click", async () => {
+        banner.style.display = "none";
+        localStorage.setItem("hubeeInstallPromptShown", "true");
+        deferredPrompt.prompt();
+        const result = await deferredPrompt.userChoice;
+        console.log("설치 응답:", result.outcome);
+        deferredPrompt = null;
+      });
+    }
   });
 
   // iOS Safari 대응
   const isIOS = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
   const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-
   if (isIOS && isSafari) {
     const banner = document.getElementById("installBanner");
-    if (banner) {
+    if (!localStorage.getItem("hubeeInstallPromptShown") && banner) {
       banner.style.display = "block";
       document.getElementById("installBtn").innerText = "Safari에서 공유 → 홈 화면에 추가";
+      localStorage.setItem("hubeeInstallPromptShown", "true");
     }
   }
 </script>
-
-</div>
 </body>
-  <!-- 설치 배너 -->
-  <div id="installBanner" style="display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: #eaf6ff; text-align: center; padding: 1rem; box-shadow: 0 -2px 8px rgba(0,0,0,0.1); z-index: 9999;">
-  <span>후비를 설치하고 더 편하게 이용해보세요! 🎄</span>
-  <button id="installBtn" style="margin-left: 10px; padding: 0.5rem 1rem; background-color: #0099ff; color: white; border: none; border-radius: 8px;">설치하기</button>
-  </html>
+</html>
