@@ -354,7 +354,7 @@
     const banner = document.getElementById("installBanner");
     if (!localStorage.getItem("hubeeInstallPromptShown") && banner) {
       banner.style.display = "block";
-      document.getElementById("installBtn").innerText = "Safari에서 공유 → 홈 화면에 추가";
+      document.getElementById("installBtn").innerText = "Safari 하단 중앙의 공유 아이콘을 눌러 '홈 화면에 추가'를 선택해 주세요!";
       localStorage.setItem("hubeeInstallPromptShown", "true");
     }
   }
