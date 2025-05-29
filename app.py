@@ -12,6 +12,11 @@ ASSISTANT_ID = os.getenv("ASSISTANT_ID")
 app = Flask(__name__, static_folder="static")
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "hubi-temp-secret")
 
+# ✅ 홈화면 앱 실행 시 진입 경로
+@app.route("/")
+def home():
+    return render_template("install.html")
+
 @app.route("/install")
 def install():
     session.clear()
