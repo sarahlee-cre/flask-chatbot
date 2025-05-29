@@ -3,7 +3,7 @@
   "short_name": "HUBEE",
   "description": "한국외대 챗봇 후비(HUBEE)와 빠르게 소통하세요!",
   "lang": "ko",
-  "start_url": "/",                      ← ✅ 수정
+  "start_url": "/",                     
   "display": "standalone",
   "display_override": ["standalone", "browser"],
   "background_color": "#eaf6ff",
