@@ -272,12 +272,11 @@
       });
 
       const data = await res.json();
-      cconst formatted = data.answer 
-        .replace(/【\d+:\d+†[^】]+】/g, '')  // 출처 제거
-        .replace(/\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/g, 
-          '<a href="$2" target="_blank" style="color:#1a0dab;">$1</a>')  // 마크다운 링크
-        .replace(/\n/g, '<br>'); 
-
+      const formatted = data.answer 
+        .replace(/【\d+:\d+†[^】]+】/g, '') // 모든 출처 제거
+        .replace(/(https?:\/\/[^\s\)\]\}]+)/g, 
+          '<a href="$1" target="_blank" style="color:#1a0dab;">$1</a>')
+        .replace(/\n/g, '<br>');
 
       chatBox.innerHTML += `<div class='bubble bot'><img class='bot-icon' src='/static/icons/icon3.png'> ${formatted}</div>`;
       chatBox.scrollTop = chatBox.scrollHeight;
