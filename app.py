@@ -29,13 +29,6 @@ def install():
 
 def fetch_assistant_response(message, session_id, thread_id):
     try:
-        # 사용자 메시지 전송
-        openai.beta.threads.messages.create(
-            thread_id=thread_id,
-            role="user",
-            content=message
-        )
-
         # Assistant 실행
         run = openai.beta.threads.runs.create(
             thread_id=thread_id,
@@ -81,7 +74,15 @@ def ask():
 
         thread_id = session["thread_id"]
         session_id = str(uuid.uuid4())
-        start_time = time.time()
+
+        # run 실행 중 여부 확인
+        try:
+            runs = openai.beta.threads.runs.list(thread_id=thread_id)
+            for r in runs.data:
+                if r.status in ["queued", "in_progress"]:
+                    return jsonify({"answer": "답변 생성 중입니다. 잠시 후 다시 시도해주세요."})
+        except:
+            pass
 
         # 사용자 메시지 전송
         openai.beta.threads.messages.create(
