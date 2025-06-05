@@ -17,7 +17,6 @@ app.secret_key = os.getenv("FLASK_SECRET_KEY", "hubi-temp-secret")
 # 사용자별 응답 저장소
 response_store = {}  # session_id: 응답 문자열
 
-# ✅ 홈화면 앱 실행 시 진입 경로
 @app.route("/")
 def home():
     return render_template("install.html")
@@ -29,6 +28,13 @@ def install():
 
 def fetch_assistant_response(message, session_id, thread_id):
     try:
+        # 누락된 사용자 메시지 전송
+        openai.beta.threads.messages.create(
+            thread_id=thread_id,
+            role="user",
+            content=message
+        )
+
         # Assistant 실행
         run = openai.beta.threads.runs.create(
             thread_id=thread_id,
@@ -75,12 +81,11 @@ def ask():
         thread_id = session["thread_id"]
         session_id = str(uuid.uuid4())
 
-        # run 실행 중 여부 확인
+        # run 실행 중 여부 확인 (최신 run만 검사)
         try:
-            runs = openai.beta.threads.runs.list(thread_id=thread_id)
-            for r in runs.data:
-                if r.status in ["queued", "in_progress"]:
-                    return jsonify({"answer": "답변 생성 중입니다. 잠시 후 다시 시도해주세요."})
+            runs = openai.beta.threads.runs.list(thread_id=thread_id, limit=1)
+            if runs.data and runs.data[0].status in ["queued", "in_progress"]:
+                return jsonify({"answer": "답변 생성 중입니다. 잠시 후 다시 시도해주세요."})
         except:
             pass
 
@@ -130,7 +135,6 @@ def ask():
         import traceback
         traceback.print_exc()
         return jsonify({"answer": f"오류 발생: {str(e)}"}), 500
-
 
 @app.route("/poll", methods=["GET"])
 def poll():
