@@ -28,27 +28,33 @@ def install():
 
 def fetch_assistant_response(message, session_id, thread_id):
     try:
-        # 누락된 사용자 메시지 전송
+        # ✅ 기존 run이 존재하는지 확인
+        runs = openai.beta.threads.runs.list(thread_id=thread_id, limit=1)
+        if runs.data and runs.data[0].status in ["queued", "in_progress"]:
+            response_store[session_id] = "이전 질문 응답이 아직 처리 중입니다. 잠시 후 다시 시도해 주세요."
+            return
+
+        # ✅ 사용자 메시지 전송
         openai.beta.threads.messages.create(
             thread_id=thread_id,
             role="user",
             content=message
         )
 
-        # Assistant 실행
+        # ✅ Assistant 실행
         run = openai.beta.threads.runs.create(
             thread_id=thread_id,
             assistant_id=ASSISTANT_ID
         )
 
-        # 응답 대기 (최대 30초)
+        # 최대 30초 대기
         for _ in range(30):
             status = openai.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
             if status.status == "completed":
                 break
             time.sleep(1)
 
-        # 메시지 리스트 받아오기
+        # 응답 추출
         messages = openai.beta.threads.messages.list(thread_id=thread_id)
         assistant_messages = [msg for msg in messages.data if msg.role == "assistant"]
         assistant_messages.sort(key=lambda x: x.created_at, reverse=True)
