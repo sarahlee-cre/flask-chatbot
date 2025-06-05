@@ -81,6 +81,12 @@
       align-items: center;
       gap: 0.5rem;
     }
+    .bubble.bot {
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.7;
+      padding: 1rem;
+    }
     .bot-icon {
       height: 28px;
       width: 28px;
@@ -273,10 +279,11 @@
 
       const data = await res.json();
       const formatted = data.answer 
-        .replace(/【\d+:\d+†[^】]+】/g, '') // 모든 출처 제거
-        .replace(/\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/g, 
-          '<a href="$2" target="_blank" style="color:#1a0dab;">$1</a>')
-        .replace(/\n/g, '<br>');
+        .replace(/【\d+:\d+†[^】]+】/g, '')  // 출처 제거
+        .replace(/\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/g,  // [텍스트](링크)
+          '<a href="$2" target="_blank" style="color:#1a0dab; text-decoration: underline;">$1</a>')
+        .replace(/\n/g, '<br>');  // 줄바꿈 유지
+
 
       chatBox.innerHTML += `<div class='bubble bot'><img class='bot-icon' src='/static/icons/icon3.png'> ${formatted}</div>`;
       chatBox.scrollTop = chatBox.scrollHeight;
