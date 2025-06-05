@@ -75,21 +75,61 @@ def fetch_assistant_response(message, session_id, thread_id):
 def ask():
     try:
         message = request.json.get("message", "")
-
-        # thread_id가 없으면 새로 생성
         if "thread_id" not in session:
             thread = openai.beta.threads.create()
             session["thread_id"] = thread.id
 
+        thread_id = session["thread_id"]
         session_id = str(uuid.uuid4())
-        threading.Thread(target=fetch_assistant_response, args=(message, session_id, session["thread_id"])).start()
+        start_time = time.time()
 
-        return jsonify({"answer": "잠시만 기다려주세요!", "session_id": session_id})
+        # 사용자 메시지 전송
+        openai.beta.threads.messages.create(
+            thread_id=thread_id,
+            role="user",
+            content=message
+        )
+
+        # Assistant 실행
+        run = openai.beta.threads.runs.create(
+            thread_id=thread_id,
+            assistant_id=ASSISTANT_ID
+        )
+
+        # 최대 5초 동안 응답 대기
+        for _ in range(5):
+            status = openai.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
+            if status.status == "completed":
+                break
+            time.sleep(1)
+
+        if status.status == "completed":
+            # 메시지 리스트 받아오기
+            messages = openai.beta.threads.messages.list(thread_id=thread_id)
+            assistant_messages = [msg for msg in messages.data if msg.role == "assistant"]
+            assistant_messages.sort(key=lambda x: x.created_at, reverse=True)
+
+            answer = None
+            for msg in assistant_messages:
+                for part in msg.content:
+                    if part.type == "text" and part.text.value.strip():
+                        answer = part.text.value.strip()
+                        break
+                if answer:
+                    break
+
+            return jsonify({"answer": answer})
+
+        else:
+            # 응답 준비 안 됨 → 백그라운드로 작업 넘김
+            threading.Thread(target=fetch_assistant_response, args=(message, session_id, thread_id)).start()
+            return jsonify({"answer": "잠시만 기다려주세요!", "session_id": session_id})
 
     except Exception as e:
         import traceback
         traceback.print_exc()
         return jsonify({"answer": f"오류 발생: {str(e)}"}), 500
+
 
 @app.route("/poll", methods=["GET"])
 def poll():

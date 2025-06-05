@@ -243,7 +243,7 @@
 
 
   <!-- JavaScript는 여기! -->
-<script>
+  <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/sw.js');
@@ -262,7 +262,7 @@
     chatBox.scrollTop = chatBox.scrollHeight;
   }
 
-  function sendMessage() {
+  async function sendMessage() {
     const input = document.getElementById("userInput");
     const message = input.value.trim();
     if (!message) return;
@@ -271,16 +271,34 @@
     input.value = "";
     history.push({ role: 'user', content: message });
 
-    fetch("/ask", {
+    const res = await fetch("/ask", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message })
-    })
-    .then(res => res.json())
-    .then(data => {
+    });
+
+    const data = await res.json();
+    const chatBox = document.getElementById("chat-box");
+
+    if (data.session_id) {
       displayMessage("🤖 잠시만 기다려주세요!", false);
       pollForAnswer(data.session_id);
-    });
+    } else {
+      if (!data.answer) {
+        displayMessage("🤖 죄송합니다. 답변을 받지 못했어요.");
+        return;
+      }
+
+      const formatted = data.answer
+        .replace(/【\d+:\d+†[^】]+】/g, '')
+        .replace(/(https?:\/\/[^\s\)\]\}]+)/g,
+          '<a href="$1" target="_blank" style="color:#1a0dab;">$1</a>')
+        .replace(/\n/g, '<br>');
+
+      chatBox.innerHTML += `<div class='bubble bot'><img class='bot-icon' src='/static/icons/icon3.png'> ${formatted}</div>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
+      history.push({ role: 'bot', content: data.answer });
+    }
   }
 
   function pollForAnswer(sessionId) {
@@ -288,7 +306,15 @@
       .then(res => res.json())
       .then(data => {
         if (data.answer_ready) {
-          displayMessage(`🤖 ${data.answer}`, false);
+          const chatBox = document.getElementById("chat-box");
+          const formatted = data.answer
+            .replace(/【\d+:\d+†[^】]+】/g, '')
+            .replace(/(https?:\/\/[^\s\)\]\}]+)/g,
+              '<a href="$1" target="_blank" style="color:#1a0dab;">$1</a>')
+            .replace(/\n/g, '<br>');
+
+          chatBox.innerHTML += `<div class='bubble bot'><img class='bot-icon' src='/static/icons/icon3.png'> ${formatted}</div>`;
+          chatBox.scrollTop = chatBox.scrollHeight;
           history.push({ role: 'bot', content: data.answer });
         } else {
           setTimeout(() => pollForAnswer(sessionId), 2000);
@@ -346,9 +372,28 @@
         sendMessage();
       }
     });
-  });
-</script>
-<script>
+
+
+      // 예시 질문 버튼 클릭 → 질문 입력 + 전송
+      document.querySelectorAll(".example-question").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const text = btn.innerText;
+          document.getElementById("userInput").value = text;
+          list.style.display = "none";
+          sendToGPT();
+        });
+      });
+
+      // ✅ Enter 키 입력은 딱 한 번만 등록!
+      document.getElementById("userInput").addEventListener("keydown", function (e) {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault(); // 줄바꿈 방지
+          sendToGPT();
+        }
+      });
+    });
+  </script>
+  <script>
   let deferredPrompt = null;
 
   window.addEventListener("beforeinstallprompt", (e) => {
