@@ -14,6 +14,7 @@ ASSISTANT_ID = os.getenv("ASSISTANT_ID")
 app = Flask(__name__, static_folder="static")
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "hubi-temp-secret")
 
+# 사용자별 응답 저장소
 response_store = {}  # session_id: 응답 문자열
 
 @app.route("/")
@@ -28,13 +29,6 @@ def install():
 def fetch_assistant_response(message, session_id, thread_id):
     try:
         print(f"[🔄 background fetch 시작] session_id={session_id}")
-
-        # 실행 중인 run 확인
-        runs = openai.beta.threads.runs.list(thread_id=thread_id, limit=1)
-        if runs.data and runs.data[0].status in ["queued", "in_progress"]:
-            print("[⚠️ run 진행중] 이전 run 처리 중")
-            response_store[session_id] = "이전 질문 응답이 아직 처리 중입니다. 잠시 후 다시 시도해 주세요."
-            return
 
         openai.beta.threads.messages.create(
             thread_id=thread_id,
