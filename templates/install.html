@@ -278,10 +278,10 @@
       });
 
       const data = await res.json();
-      const formatted = data.answer 
-        .replace(/【\d+:\d+†[^】]+】/g, '') // 모든 출처 제거
-        .replace(/(https?:\/\/[^\s\)\]\}]+)/g, 
-          '<a href="$1" target="_blank" style="color:#1a0dab;">$1</a>')
+      const formatted = data.answer
+        .replace(/\u3010\d+:\d+†[^\u3011]+\u3011/g, '') // 출처 제거
+        .replace(/(https?:\/\/[^\s)\]}]+)/g, '<a href="$1" target="_blank" style="color:#1a0dab;">$1</a>')
+        .replace(/\[(.*?)\]\((https?:\/\/[^\s)\]}]+)\)/g, '<a href="$2" target="_blank" style="color:#1a0dab;">$1</a>')
         .replace(/\n/g, '<br>');
 
       chatBox.innerHTML += `<div class='bubble bot'><img class='bot-icon' src='/static/icons/icon3.png'> ${formatted}</div>`;
