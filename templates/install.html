@@ -371,26 +371,7 @@
         e.preventDefault();
         sendMessage();
       }
-    });
-
-
-      // 예시 질문 버튼 클릭 → 질문 입력 + 전송
-      document.querySelectorAll(".example-question").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const text = btn.innerText;
-          document.getElementById("userInput").value = text;
-          list.style.display = "none";
-          sendToGPT();
-        });
-      });
-
-      // ✅ Enter 키 입력은 딱 한 번만 등록!
-      document.getElementById("userInput").addEventListener("keydown", function (e) {
-        if (e.key === "Enter" && !e.shiftKey) {
-          e.preventDefault(); // 줄바꿈 방지
-          sendToGPT();
-        }
-      });
+     });
     });
   </script>
   <script>
