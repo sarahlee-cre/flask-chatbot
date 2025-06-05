@@ -243,101 +243,112 @@
 
 
   <!-- JavaScript는 여기! -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js');
-      });
-    }
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js');
+    });
+  }
 
+  let history = [];
+  let allConversations = [];
 
-    let history = [];
-    let allConversations = [];
+  function displayMessage(text, isUser = false) {
+    const chatBox = document.getElementById("chat-box");
+    const div = document.createElement("div");
+    div.className = isUser ? "bubble user" : "bubble bot";
+    div.innerHTML = text;
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
 
-    window.sendToGPT = async function () {
-      const inputEl = document.getElementById("userInput");
-      const userInput = inputEl.value.trim();
-      if (!userInput) return;
+  function sendMessage() {
+    const input = document.getElementById("userInput");
+    const message = input.value.trim();
+    if (!message) return;
 
-      const chatBox = document.getElementById("chat-box");
-      chatBox.innerHTML += `<div class='bubble user'>🙋‍♀️ ${userInput}</div>`;
-      inputEl.value = "";
-      chatBox.scrollTop = chatBox.scrollHeight;
-      history.push({ role: 'user', content: userInput });
+    displayMessage(`🙋‍♀️ ${message}`, true);
+    input.value = "";
+    history.push({ role: 'user', content: message });
 
-      const res = await fetch("/ask", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userInput })
-      });
+    fetch("/ask", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message })
+    })
+    .then(res => res.json())
+    .then(data => {
+      displayMessage("🤖 잠시만 기다려주세요!", false);
+      pollForAnswer(data.session_id);
+    });
+  }
 
-      const data = await res.json();
-      const formatted = data.answer 
-        .replace(/【\d+:\d+†[^】]+】/g, '') // 모든 출처 제거
-        .replace(/(https?:\/\/[^\s\)\]\}]+)/g, 
-          '<a href="$1" target="_blank" style="color:#1a0dab;">$1</a>')
-        .replace(/\n/g, '<br>');
-
-      chatBox.innerHTML += `<div class='bubble bot'><img class='bot-icon' src='/static/icons/icon3.png'> ${formatted}</div>`;
-      chatBox.scrollTop = chatBox.scrollHeight;
-      history.push({ role: 'bot', content: data.answer });
-    };
-
-    window.clearChat = function () {
-      if (history.length > 0) {
-        allConversations.push([...history]);
-        history = [];
-      }
-      document.getElementById("chat-box").innerHTML = "";
-    };
-
-    window.viewHistory = function () {
-      if (allConversations.length === 0) {
-        alert("이전 대화 기록이 없습니다.");
-        return;
-      }
-      let output = allConversations.map((conv, idx) => {
-        return `📂 대화 ${idx + 1}\n` + conv.map(h => `${h.role === 'user' ? '🙋‍♀️' : '🤖'} ${h.content}`).join('\n');
-      }).join('\n\n----------------------\n\n');
-      alert(output);
-    };
-
-    window.openModal = function () {
-      document.getElementById("infoModal").style.display = "block";
-    };
-
-    window.closeModal = function () {
-      document.getElementById("infoModal").style.display = "none";
-    };
-
-    document.addEventListener("DOMContentLoaded", function () {
-      const toggleBtn = document.getElementById("toggleExamples");
-      const list = document.getElementById("exampleList");
-
-      toggleBtn.addEventListener("click", () => {
-        list.style.display = list.style.display === "none" ? "block" : "none";
-      });
-
-      // 예시 질문 버튼 클릭 → 질문 입력 + 전송
-      document.querySelectorAll(".example-question").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const text = btn.innerText;
-          document.getElementById("userInput").value = text;
-          list.style.display = "none";
-          sendToGPT();
-        });
-      });
-
-      // ✅ Enter 키 입력은 딱 한 번만 등록!
-      document.getElementById("userInput").addEventListener("keydown", function (e) {
-        if (e.key === "Enter" && !e.shiftKey) {
-          e.preventDefault(); // 줄바꿈 방지
-          sendToGPT();
+  function pollForAnswer(sessionId) {
+    fetch(`/poll?session_id=${sessionId}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.answer_ready) {
+          displayMessage(`🤖 ${data.answer}`, false);
+          history.push({ role: 'bot', content: data.answer });
+        } else {
+          setTimeout(() => pollForAnswer(sessionId), 2000);
         }
       });
+  }
+
+  window.clearChat = function () {
+    if (history.length > 0) {
+      allConversations.push([...history]);
+      history = [];
+    }
+    document.getElementById("chat-box").innerHTML = "";
+  };
+
+  window.viewHistory = function () {
+    if (allConversations.length === 0) {
+      alert("이전 대화 기록이 없습니다.");
+      return;
+    }
+    let output = allConversations.map((conv, idx) => {
+      return `📂 대화 ${idx + 1}\n` + conv.map(h => `${h.role === 'user' ? '🙋‍♀️' : '🤖'} ${h.content}`).join('\n');
+    }).join('\n\n----------------------\n\n');
+    alert(output);
+  };
+
+  window.openModal = function () {
+    document.getElementById("infoModal").style.display = "block";
+  };
+
+  window.closeModal = function () {
+    document.getElementById("infoModal").style.display = "none";
+  };
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const toggleBtn = document.getElementById("toggleExamples");
+    const list = document.getElementById("exampleList");
+
+    toggleBtn.addEventListener("click", () => {
+      list.style.display = list.style.display === "none" ? "block" : "none";
     });
-  </script>
-  <script>
+
+    document.querySelectorAll(".example-question").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const text = btn.innerText;
+        document.getElementById("userInput").value = text;
+        list.style.display = "none";
+        sendMessage();
+      });
+    });
+
+    document.getElementById("userInput").addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+  });
+</script>
+<script>
   let deferredPrompt = null;
 
   window.addEventListener("beforeinstallprompt", (e) => {
