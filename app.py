@@ -30,6 +30,13 @@ def fetch_assistant_response(message, session_id, thread_id):
     try:
         print(f"[🔄 background fetch 시작] session_id={session_id}")
 
+        # ✅ run 상태 검사 추가
+        runs = openai.beta.threads.runs.list(thread_id=thread_id, limit=1)
+        if runs.data and runs.data[0].status in ["queued", "in_progress"]:
+            print(f"[⚠️ 이미 진행 중인 run 존재] session_id={session_id}")
+            response_store[session_id] = "이전 질문 응답이 아직 처리 중입니다. 잠시 후 다시 시도해 주세요."
+            return
+
         openai.beta.threads.messages.create(
             thread_id=thread_id,
             role="user",
